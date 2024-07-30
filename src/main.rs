@@ -19,7 +19,7 @@
 use lib_file::file_mngmnt::*;
 use fltk::*;
 use std::ffi::OsStr;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::convert::From;
 
 const PROGRAM_TITLE: &str = "File Management Functions";
@@ -35,13 +35,11 @@ fn main() {
     let path = file_pathonly();
 
     println!("\n {:?} \n", path);
-
 }
 
+/*
 
-
-
-pub fn file_pathonly() -> String {
+pub fn file_fullpath() -> String {
     let mut dialog = dialog::NativeFileChooser::new(dialog::NativeFileChooserType::BrowseFile);
     dialog.show();
     println!("\n {:?} \n", dialog.filename());
@@ -51,11 +49,25 @@ pub fn file_pathonly() -> String {
     path
 }
 
+ */
+
+
+
+pub fn file_pathonly() -> String {
+    let mut dialog = dialog::NativeFileChooser::new(dialog::NativeFileChooserType::BrowseFile);
+    dialog.show();
+
+    let path = dialog.filename();
+    let pathonly = path.parent().unwrap().to_str().unwrap().to_string();
+
+    pathonly
+}
+
+
 
 pub fn file_nameonly() -> String {
     let mut dialog = dialog::NativeFileChooser::new(dialog::NativeFileChooserType::BrowseFile);
     dialog.show();
-    println!("\n {:?} \n", dialog.filename());
 
     let path = dialog.filename();
 
