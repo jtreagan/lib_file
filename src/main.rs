@@ -32,24 +32,22 @@ fn splash() {
 
 fn main() {
 
-    let path = file_pathonly();
+    let path = file_fullpath();
 
     println!("\n {:?} \n", path);
 }
 
-/*
+
 
 pub fn file_fullpath() -> String {
     let mut dialog = dialog::NativeFileChooser::new(dialog::NativeFileChooserType::BrowseFile);
     dialog.show();
-    println!("\n {:?} \n", dialog.filename());
 
     let path = dialog.filename().to_str().unwrap().to_string();
 
     path
 }
 
- */
 
 
 
