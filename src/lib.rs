@@ -46,6 +46,45 @@ pub mod file_fltk {
     }
 
 
+    pub fn file_fullpath_fltr(extension: &str) -> String {
+        let mut dialog = dialog::NativeFileChooser::new(dialog::NativeFileChooserType::BrowseFile);
+        dialog.set_filter(extension);
+
+        dialog.show();
+
+        let path = dialog.filename().to_str().unwrap().to_string();
+
+        path
+    }
+
+    pub fn file_pathonly_fltr(extension: &str) -> String {
+        let mut dialog = dialog::NativeFileChooser::new(dialog::NativeFileChooserType::BrowseFile);
+        dialog.set_filter(extension);
+
+        dialog.show();
+
+        let path = dialog.filename();
+        let pathonly = path.parent().unwrap().to_str().unwrap().to_string();
+
+        pathonly
+    }
+
+    pub fn file_nameonly_fltr(extension: &str) -> String {
+        let mut dialog = dialog::NativeFileChooser::new(dialog::NativeFileChooserType::BrowseFile);
+        dialog.set_filter(extension);
+
+        dialog.show();
+
+        let path = dialog.filename();
+
+        let filename = path.file_name().expect("The path has no file available.");
+        let filename_str = filename.to_str().expect("The path is not valid UTF-8");
+        let filename_string: String = filename_str.to_string();
+
+        filename_string
+    }
+
+
 }  // End file_fltk module.
 
 

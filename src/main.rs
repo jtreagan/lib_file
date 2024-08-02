@@ -11,7 +11,7 @@
 /*
     ~~~~~~~~~~~~~~~~~~~~~~~  Goals  ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    -- Working on    pathonly()
+
 
  */
 
@@ -33,9 +33,17 @@ fn splash() {
 
 fn main() {
 
-    let path = file_fullpath();
+    let fullpath = file_fullpath_fltr("*.lst");
+    println!("\n {:?} \n", fullpath);
 
-    println!("\n {:?} \n", path);
+    let pathonly = file_pathonly_fltr("*.lst");
+    println!("\n {:?} \n", pathonly);
+
+    let nameonly = file_nameonly_fltr("*.lst");
+    println!("\n {:?} \n", nameonly);
+
+
+
 }
 
 
