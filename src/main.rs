@@ -41,9 +41,6 @@ fn main() {
 
     let nameonly = file_nameonly_fltr("*.lst");
     println!("\n {:?} \n", nameonly);
-
-
-
 }
 
 
