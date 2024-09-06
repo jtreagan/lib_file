@@ -13,6 +13,17 @@
 pub mod file_fltk {
     use fltk::dialog;
 
+
+    pub fn file_browse_save() -> String{
+        let mut dialog = dialog::NativeFileChooser::new(dialog::NativeFileChooserType::BrowseSaveFile);
+        dialog.show();
+
+        let path = dialog.filename().to_str().unwrap().to_string();
+
+        path
+    }
+
+
     pub fn file_fullpath() -> String {
         let mut dialog = dialog::NativeFileChooser::new(dialog::NativeFileChooserType::BrowseFile);
         dialog.show();

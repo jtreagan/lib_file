@@ -33,14 +33,9 @@ fn splash() {
 
 fn main() {
 
-    let fullpath = file_fullpath_fltr("*.lst");
-    println!("\n {:?} \n", fullpath);
+    let path = file_browse_save();
+    println!("\n {:?} \n", path);
 
-    let pathonly = file_pathonly_fltr("*.lst");
-    println!("\n {:?} \n", pathonly);
-
-    let nameonly = file_nameonly_fltr("*.lst");
-    println!("\n {:?} \n", nameonly);
 }
 
 
