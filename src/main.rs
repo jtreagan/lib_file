@@ -32,8 +32,8 @@ fn splash() {
 }
 
 fn main() {
-
-    let path = file_browse_save();
+//Text Files   \t*.txt\nVariable Files   \t*.vrbl\nAll Files
+    let path = file_browse_save_fltr("*.*");
     println!("\n {:?} \n", path);
 
 }

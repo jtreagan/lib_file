@@ -17,6 +17,24 @@ pub mod file_fltk {
     pub fn file_browse_save() -> String{
         let mut dialog = dialog::NativeFileChooser::new(dialog::NativeFileChooserType::BrowseSaveFile);
         dialog.show();
+        let path = dialog.filename().to_str().unwrap().to_string();
+        path
+    }
+
+    /*
+                    Sample Usage --   file_browse_save_fltr()
+
+    let path = file_browse_save_fltr(Text Files   \t*.txt\nVariable Files   \t*.vrbl\nAll Files);
+    let path = file_browse_save_fltr("*.*");    // To show all files.
+ */
+
+    pub fn file_browse_save_fltr(extension: &str) -> String{
+        let mut dialog = dialog::NativeFileChooser
+            ::new(dialog::NativeFileChooserType
+            ::BrowseSaveFile);
+        dialog.set_filter(extension);
+
+        dialog.show();
 
         let path = dialog.filename().to_str().unwrap().to_string();
 
