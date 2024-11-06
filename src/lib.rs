@@ -21,6 +21,11 @@ pub mod file_fltk {
             set a passed directory as a starting place
             for the browsing.
 
+    -- The file browser is forcing the choice of whatever
+            folder is at the end of the tree.  I won't let
+            the user choose some folder in the middle of the
+            branch.  Fix it.
+
 */
 
 
@@ -61,6 +66,7 @@ pub mod file_fltk {
  */
 
     pub fn file_browse_save_fltr(use_dir: &str, extension: &str) -> String{
+        // Note that the `extension` value must have format  `*.xxxxx`.
         // Convert the text of the directory into a PATH.
         let strtpath = Path::new(use_dir);
         if !strtpath.exists() {
@@ -172,6 +178,7 @@ pub mod file_fltk {
 
 
     pub fn file_fullpath_fltr(use_dir: &str, extension: &str) -> String {
+        // Note that the `extension` value must have format  `*.xxxxx`.
         // Convert the text of the directory into a PATH.
         let strtpath = Path::new(use_dir);
         if !strtpath.exists() {
@@ -199,6 +206,7 @@ pub mod file_fltk {
     }
 
     pub fn file_pathonly_fltr(use_dir: &str, extension: &str) -> String {
+        // Note that the `extension` value must have format  `*.xxxxx`.
         // Convert the text of the directory into a PATH.
         let strtpath = Path::new(use_dir);
         if !strtpath.exists() {
@@ -225,6 +233,7 @@ pub mod file_fltk {
     }
 
     pub fn file_nameonly_fltr(use_dir: &str, extension: &str) -> String {
+        // Note that the `extension` value must have format  `*.xxxxx`.
         // Convert the text of the directory into a PATH.
         let strtpath = Path::new(use_dir);
         if !strtpath.exists() {

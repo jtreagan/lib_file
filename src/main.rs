@@ -33,7 +33,7 @@ fn splash() {
 
 
 fn main() {
-    let pathstr = file_browse_save("/home/jtreagan/programming/rust/mine/");
+    let pathstr = file_nameonly_fltr("/home/jtreagan/programming/rust/mine", "*.lst");
 
     println!("\n In  main()  the chosen path is:  {} \n", pathstr);
 }
