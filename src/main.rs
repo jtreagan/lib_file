@@ -31,12 +31,13 @@ fn splash() {
     println!("                  VERSION   {}\n\n", VERSION);
 }
 
-fn main() {
-//Text Files   \t*.txt\nVariable Files   \t*.vrbl\nAll Files
-    let path = file_browse_save_fltr("*.*");
-    println!("\n {:?} \n", path);
 
+fn main() {
+    let pathstr = file_browse_save("/home/jtreagan/programming/rust/mine/");
+
+    println!("\n In  main()  the chosen path is:  {} \n", pathstr);
 }
+
 
 
 

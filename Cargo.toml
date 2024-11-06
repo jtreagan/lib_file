@@ -19,5 +19,5 @@ dialoguer = { version = "0.11.0", features = ["completion"] }
 console = "0.15.8"
 
 # Reagan created crates
-lib_jt = {path = "/home/camascounty/programming/rust/mine/lib_jt/"}
+lib_jt = {path = "/home/jtreagan/programming/rust/mine/lib_jt/"}
 

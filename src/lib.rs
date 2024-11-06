@@ -9,14 +9,46 @@
 
 */
 
+//pub const DATA_GENERAL_FOLDER: &str = "/home/jtreagan/programming/rust/mine/qbnk_data";
+
 
 pub mod file_fltk {
+
+/*
+                        TO DO
+
+    -- Convert each function that uses a file browser to
+            set a passed directory as a starting place
+            for the browsing.
+
+*/
+
+
+    use std::path::Path;
     use fltk::dialog;
+    //use crate::DATA_GENERAL_FOLDER;
 
+    pub fn file_browse_save(use_dir: &str) -> String{
+        // Convert the text of the directory into a PATH.
+        let strtpath = Path::new(use_dir);
+        if !strtpath.exists() {
+            eprintln!("The path {} does not exist!", strtpath.display());
+            return String::new();
+        }
 
-    pub fn file_browse_save() -> String{
-        let mut dialog = dialog::NativeFileChooser::new(dialog::NativeFileChooserType::BrowseSaveFile);
+        // Set the dialog browser to the default directory.
+        let mut dialog = dialog::NativeFileChooser::new(dialog
+                ::NativeFileChooserType::BrowseSaveFile);
+        dialog.set_directory(&strtpath);
+
+        // Check if the directory was set correctly.
+        let current_dir = dialog.directory();
+        if current_dir == Path::new("") {
+            eprintln!("Failed to set the starting directory.");
+        }
+
         dialog.show();
+
         let path = dialog.filename().to_str().unwrap().to_string();
         path
     }
@@ -24,11 +56,11 @@ pub mod file_fltk {
     /*
                     Sample Usage --   file_browse_save_fltr()
 
-    let path = file_browse_save_fltr(Text Files   \t*.txt\nVariable Files   \t*.vrbl\nAll Files);
+    let path = file_browse_save_fltr("Text Files   \t*.txt\nVariable Files   \t*.vrbl\nAll Files");
     let path = file_browse_save_fltr("*.*");    // To show all files.
  */
 
-    pub fn file_browse_save_fltr(extension: &str) -> String{
+    pub fn file_browse_save_fltr(use_dir: &str, extension: &str) -> String{
         let mut dialog = dialog::NativeFileChooser
             ::new(dialog::NativeFileChooserType
             ::BrowseSaveFile);
@@ -42,7 +74,7 @@ pub mod file_fltk {
     }
 
 
-    pub fn file_fullpath() -> String {
+    pub fn file_fullpath(use_dir: &str) -> String {
         let mut dialog = dialog::NativeFileChooser::new(dialog::NativeFileChooserType::BrowseFile);
         dialog.show();
 
@@ -51,7 +83,7 @@ pub mod file_fltk {
         path
     }
 
-    pub fn file_pathonly() -> String {
+    pub fn file_pathonly(use_dir: &str) -> String {
         let mut dialog = dialog::NativeFileChooser::new(dialog::NativeFileChooserType::BrowseFile);
         dialog.show();
 
@@ -61,7 +93,7 @@ pub mod file_fltk {
         pathonly
     }
 
-    pub fn file_nameonly() -> String {
+    pub fn file_nameonly(use_dir: &str) -> String {
         let mut dialog = dialog::NativeFileChooser::new(dialog::NativeFileChooserType::BrowseFile);
         dialog.show();
 
@@ -75,7 +107,7 @@ pub mod file_fltk {
     }
 
 
-    pub fn file_fullpath_fltr(extension: &str) -> String {
+    pub fn file_fullpath_fltr(use_dir: &str, extension: &str) -> String {
         let mut dialog = dialog::NativeFileChooser::new(dialog::NativeFileChooserType::BrowseFile);
         dialog.set_filter(extension);
 
@@ -86,7 +118,7 @@ pub mod file_fltk {
         path
     }
 
-    pub fn file_pathonly_fltr(extension: &str) -> String {
+    pub fn file_pathonly_fltr(use_dir: &str, extension: &str) -> String {
         let mut dialog = dialog::NativeFileChooser::new(dialog::NativeFileChooserType::BrowseFile);
         dialog.set_filter(extension);
 
@@ -98,7 +130,7 @@ pub mod file_fltk {
         pathonly
     }
 
-    pub fn file_nameonly_fltr(extension: &str) -> String {
+    pub fn file_nameonly_fltr(use_dir: &str, extension: &str) -> String {
         let mut dialog = dialog::NativeFileChooser::new(dialog::NativeFileChooserType::BrowseFile);
         dialog.set_filter(extension);
 
@@ -121,6 +153,20 @@ pub mod file_mngmnt {
     use std::{path::Path, fmt::Debug, fs, fs::File, str::FromStr};
     use std::io::{BufRead, BufReader, Write};
     use lib_jt::{misc::*, input_utilities::*};
+
+    pub fn file_path_to_fname(pathstr: &String) -> String {
+        let usepath = Path::new(pathstr);
+
+        match usepath.file_name() {
+            Some(filename_osstr) => {
+                match filename_osstr.to_str() {
+                    Some(filename_str) => filename_str.to_string(),
+                    None => "Error: Could not convert filename to UTF-8 string.".to_string(),
+                }
+            }
+            None => "Error: could not get filename".to_string()
+        }
+    }
 
 
     /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -524,19 +570,4 @@ fn main() {
 
 
 } // End file_mngmnt module.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
