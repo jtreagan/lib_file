@@ -9,23 +9,18 @@
 
 */
 
-//pub const DATA_GENERAL_FOLDER: &str = "/home/jtreagan/programming/rust/mine/qbnk_data";
-
-
 pub mod file_fltk {
 
 /*
-                        TO DO
-
-    -- Convert each function that uses a file browser to
-            set a passed directory as a starting place
-            for the browsing.
+                                TO DO
 
     -- The file browser is forcing the choice of whatever
-            folder is at the end of the tree.  I won't let
+            folder is at the end of the branch.  It won't let
             the user choose some folder in the middle of the
             branch.  Fix it.
 
+    -- Need to deal with the result returned by
+            dialog.set_directory(&strtpath);
 */
 
 
@@ -38,13 +33,16 @@ pub mod file_fltk {
         let strtpath = Path::new(use_dir);
         if !strtpath.exists() {
             eprintln!("The path {} does not exist!", strtpath.display());
-            return String::new();
+            //return String::new();
         }
 
         // Set the dialog browser to the default directory.
         let mut dialog = dialog::NativeFileChooser::new(dialog
                 ::NativeFileChooserType::BrowseSaveFile);
-        dialog.set_directory(&strtpath);
+        let setrslt = dialog.set_directory(&strtpath);
+        if let Err(e) = setrslt {
+            eprintln!("Failed to set starting directory to:  {}", e);
+        }
 
         // Check if the directory was set correctly.
         let current_dir = dialog.directory();
@@ -286,7 +284,6 @@ pub mod file_mngmnt {
         }
     }
 
-
     /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
             ******* Example for file_get_dir_list() ******
@@ -298,7 +295,6 @@ pub mod file_mngmnt {
         println!("\n In main() the list of files is \n {:?}", file_names);
     }
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
 
     pub fn file_get_dir_list(path: &str) -> Vec<String> {
         let dir_entries = fs::read_dir(path).unwrap();
@@ -421,8 +417,6 @@ pub mod file_mngmnt {
         vctr.retain(|item| (item.split('.').last().unwrap()) == keeper);
     }
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
     pub fn file_read_to_vec<T: FromStr>(fname: &str, vctr: &mut Vec<T>)
         where <T as FromStr>::Err: Debug {
         let file = File::open(fname).unwrap();
@@ -434,8 +428,6 @@ pub mod file_mngmnt {
             vctr.push(num);
         }
     }
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     pub fn file_save_vec<T: std::fmt::Display>(fname: &str, vector: &[T]) ->
                                                           std::io::Result<()> {
