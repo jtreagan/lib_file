@@ -22,15 +22,17 @@ pub mod file_fltk {
     -- Need to deal with the result returned by
             dialog.set_directory(&strtpath);
 */
-
-
+    use std::cell::RefCell;
     use std::path::Path;
+    use std::rc::Rc;
     use fltk::dialog;
-    //use crate::DATA_GENERAL_FOLDER;
 
-    pub fn file_browse_save(use_dir: &str) -> String{
-        // Convert the text of the directory into a PATH.
-        let strtpath = Path::new(use_dir);
+    pub fn file_browse_save(usedir: Rc<RefCell<String>>) -> String {
+        // Convert the RefCell contents to a String.
+        let rc_contents: String = usedir.borrow().clone();
+
+        // Convert the text of the starting directory into a PATH.
+        let strtpath = Path::new(rc_contents.as_str());
         if !strtpath.exists() {
             eprintln!("The path {} does not exist!", strtpath.display());
         }
@@ -54,12 +56,16 @@ pub mod file_fltk {
 
     let path = file_browse_save_fltr("Text Files   \t*.txt\nVariable Files   \t*.vrbl\nAll Files");
     let path = file_browse_save_fltr("*.*");    // To show all files.
- */
+ */  // Sample Usage --   file_browse_save_fltr()
 
-    pub fn file_browse_save_fltr(use_dir: &str, extension: &str) -> String{
-        // Note that the `extension` value must have format  `*.xxxxx`.
-        // Convert the text of the directory into a PATH.
-        let strtpath = Path::new(use_dir);
+    pub fn file_browse_save_fltr(usedir: Rc<RefCell<String>>, extension: &str) -> String{
+        // Note that the `extension` value must have format  "*.xxxxx"
+
+        // Convert the RefCell contents to a String.
+        let rc_contents: String = usedir.borrow().clone();
+
+        // Convert the text of the starting directory into a PATH.
+        let strtpath = Path::new(rc_contents.as_str());
         if !strtpath.exists() {
             eprintln!("The path {} does not exist!", strtpath.display());
         }
@@ -81,9 +87,12 @@ pub mod file_fltk {
     }
 
 
-    pub fn file_fullpath(use_dir: &str) -> String {
-        // Convert the text of the directory into a PATH.
-        let strtpath = Path::new(use_dir);
+    pub fn file_fullpath(usedir: Rc<RefCell<String>>) -> String {
+        // Convert the RefCell contents to a String.
+        let rc_contents: String = usedir.borrow().clone();
+
+        // Convert the text of the starting directory into a PATH.
+        let strtpath = Path::new(rc_contents.as_str());
         if !strtpath.exists() {
             eprintln!("The path {} does not exist!", strtpath.display());
         }
@@ -103,9 +112,12 @@ pub mod file_fltk {
         path
     }
 
-    pub fn file_pathonly(use_dir: &str) -> String {
-        // Convert the text of the directory into a PATH.
-        let strtpath = Path::new(use_dir);
+    pub fn file_pathonly(usedir: Rc<RefCell<String>>) -> String {
+        // Convert the RefCell contents to a String.
+        let rc_contents: String = usedir.borrow().clone();
+
+        // Convert the text of the starting directory into a PATH.
+        let strtpath = Path::new(rc_contents.as_str());
         if !strtpath.exists() {
             eprintln!("The path {} does not exist!", strtpath.display());
         }
@@ -125,9 +137,12 @@ pub mod file_fltk {
         pathonly
     }
 
-    pub fn file_nameonly(use_dir: &str) -> String {
-        // Convert the text of the directory into a PATH.
-        let strtpath = Path::new(use_dir);
+    pub fn file_nameonly(usedir: Rc<RefCell<String>>) -> String {
+        // Convert the RefCell contents to a String.
+        let rc_contents: String = usedir.borrow().clone();
+
+        // Convert the text of the starting directory into a PATH.
+        let strtpath = Path::new(rc_contents.as_str());
         if !strtpath.exists() {
             eprintln!("The path {} does not exist!", strtpath.display());
         }
@@ -152,10 +167,14 @@ pub mod file_fltk {
     }
 
 
-    pub fn file_fullpath_fltr(use_dir: &str, extension: &str) -> String {
+    pub fn file_fullpath_fltr(usedir: Rc<RefCell<String>>, extension: &str) -> String {
         // Note that the `extension` value must have format  `*.xxxxx`.
-        // Convert the text of the directory into a PATH.
-        let strtpath = Path::new(use_dir);
+
+        // Convert the RefCell contents to a String.
+        let rc_contents: String = usedir.borrow().clone();
+
+        // Convert the text of the starting directory into a PATH.
+        let strtpath = Path::new(rc_contents.as_str());
         if !strtpath.exists() {
             eprintln!("The path {} does not exist!", strtpath.display());
         }
@@ -175,10 +194,14 @@ pub mod file_fltk {
         path
     }
 
-    pub fn file_pathonly_fltr(use_dir: &str, extension: &str) -> String {
+    pub fn file_pathonly_fltr(usedir: Rc<RefCell<String>>, extension: &str) -> String {
         // Note that the `extension` value must have format  `*.xxxxx`.
-        // Convert the text of the directory into a PATH.
-        let strtpath = Path::new(use_dir);
+
+        // Convert the RefCell contents to a String.
+        let rc_contents: String = usedir.borrow().clone();
+
+        // Convert the text of the starting directory into a PATH.
+        let strtpath = Path::new(rc_contents.as_str());
         if !strtpath.exists() {
             eprintln!("The path {} does not exist!", strtpath.display());
         }
@@ -198,10 +221,14 @@ pub mod file_fltk {
         pathonly
     }
 
-    pub fn file_nameonly_fltr(use_dir: &str, extension: &str) -> String {
+    pub fn file_nameonly_fltr(usedir: Rc<RefCell<String>>, extension: &str) -> String {
         // Note that the `extension` value must have format  `*.xxxxx`.
-        // Convert the text of the directory into a PATH.
-        let strtpath = Path::new(use_dir);
+
+        // Convert the RefCell contents to a String.
+        let rc_contents: String = usedir.borrow().clone();
+
+        // Convert the text of the starting directory into a PATH.
+        let strtpath = Path::new(rc_contents.as_str());
         if !strtpath.exists() {
             eprintln!("The path {} does not exist!", strtpath.display());
         }
