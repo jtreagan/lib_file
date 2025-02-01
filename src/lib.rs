@@ -6,7 +6,6 @@
 
     -- Write examples for functions that don't already have one.
 
-
 */
 
 pub mod file_fltk {
@@ -21,18 +20,20 @@ pub mod file_fltk {
 
     -- Need to deal with the result returned by
             dialog.set_directory(&strtpath);
-*/
-    use std::cell::RefCell;
-    use std::path::Path;
-    use std::rc::Rc;
-    use fltk::dialog;
 
-    pub fn file_browse_save(usedir: Rc<RefCell<String>>) -> String {
+    -- Change out the  RefCell  parameters for  String.  Works better.
+
+*/
+
+    use fltk::dialog;
+    use std::path::Path;
+
+    pub fn file_browse_save(usedir: &String) -> String {
         // Convert the RefCell contents to a String.
-        let rc_contents: String = usedir.borrow().clone();
+        //let rc_contents: String = usedir.borrow().clone();
 
         // Convert the text of the starting directory into a PATH.
-        let strtpath = Path::new(rc_contents.as_str());
+        let strtpath = Path::new(usedir.as_str());
         if !strtpath.exists() {
             eprintln!("The path {} does not exist!", strtpath.display());
         }
@@ -57,15 +58,14 @@ pub mod file_fltk {
     let path = file_browse_save_fltr("Text Files   \t*.txt\nVariable Files   \t*.vrbl\nAll Files");
     let path = file_browse_save_fltr("*.*");    // To show all files.
  */  // Sample Usage --   file_browse_save_fltr()
-
-    pub fn file_browse_save_fltr(usedir: Rc<RefCell<String>>, extension: &str) -> String{
+    pub fn file_browse_save_fltr(usedir: &String, extension: &str) -> String{
         // Note that the `extension` value must have format  "*.xxxxx"
 
         // Convert the RefCell contents to a String.
-        let rc_contents: String = usedir.borrow().clone();
+        //let rc_contents: String = usedir.borrow().clone();
 
         // Convert the text of the starting directory into a PATH.
-        let strtpath = Path::new(rc_contents.as_str());
+        let strtpath = Path::new(usedir.as_str());
         if !strtpath.exists() {
             eprintln!("The path {} does not exist!", strtpath.display());
         }
@@ -87,12 +87,12 @@ pub mod file_fltk {
     }
 
 
-    pub fn file_fullpath(usedir: Rc<RefCell<String>>) -> String {
+    pub fn file_fullpath(usedir: &String) -> String {
         // Convert the RefCell contents to a String.
-        let rc_contents: String = usedir.borrow().clone();
+        //let rc_contents: String = usedir.borrow().clone();
 
         // Convert the text of the starting directory into a PATH.
-        let strtpath = Path::new(rc_contents.as_str());
+        let strtpath = Path::new(usedir.as_str());
         if !strtpath.exists() {
             eprintln!("The path {} does not exist!", strtpath.display());
         }
@@ -112,12 +112,12 @@ pub mod file_fltk {
         path
     }
 
-    pub fn file_pathonly(usedir: Rc<RefCell<String>>) -> String {
+    pub fn file_pathonly(usedir: &String) -> String {
         // Convert the RefCell contents to a String.
-        let rc_contents: String = usedir.borrow().clone();
+        //let rc_contents: String = usedir.borrow().clone();
 
         // Convert the text of the starting directory into a PATH.
-        let strtpath = Path::new(rc_contents.as_str());
+        let strtpath = Path::new(usedir.as_str());
         if !strtpath.exists() {
             eprintln!("The path {} does not exist!", strtpath.display());
         }
@@ -137,12 +137,12 @@ pub mod file_fltk {
         pathonly
     }
 
-    pub fn file_nameonly(usedir: Rc<RefCell<String>>) -> String {
+    pub fn file_nameonly(usedir: &String) -> String {
         // Convert the RefCell contents to a String.
-        let rc_contents: String = usedir.borrow().clone();
+        //let rc_contents: String = usedir.borrow().clone();
 
         // Convert the text of the starting directory into a PATH.
-        let strtpath = Path::new(rc_contents.as_str());
+        let strtpath = Path::new(usedir.as_str());
         if !strtpath.exists() {
             eprintln!("The path {} does not exist!", strtpath.display());
         }
@@ -167,14 +167,14 @@ pub mod file_fltk {
     }
 
 
-    pub fn file_fullpath_fltr(usedir: Rc<RefCell<String>>, extension: &str) -> String {
+    pub fn file_fullpath_fltr(usedir: &String, extension: &str) -> String {
         // Note that the `extension` value must have format  `*.xxxxx`.
 
         // Convert the RefCell contents to a String.
-        let rc_contents: String = usedir.borrow().clone();
+        //let rc_contents: String = usedir.borrow().clone();
 
         // Convert the text of the starting directory into a PATH.
-        let strtpath = Path::new(rc_contents.as_str());
+        let strtpath = Path::new(usedir.as_str());
         if !strtpath.exists() {
             eprintln!("The path {} does not exist!", strtpath.display());
         }
@@ -194,14 +194,14 @@ pub mod file_fltk {
         path
     }
 
-    pub fn file_pathonly_fltr(usedir: Rc<RefCell<String>>, extension: &str) -> String {
+    pub fn file_pathonly_fltr(usedir: &String, extension: &str) -> String {
         // Note that the `extension` value must have format  `*.xxxxx`.
 
         // Convert the RefCell contents to a String.
-        let rc_contents: String = usedir.borrow().clone();
+        //let rc_contents: String = usedir.borrow().clone();
 
         // Convert the text of the starting directory into a PATH.
-        let strtpath = Path::new(rc_contents.as_str());
+        let strtpath = Path::new(usedir.as_str());
         if !strtpath.exists() {
             eprintln!("The path {} does not exist!", strtpath.display());
         }
@@ -221,14 +221,14 @@ pub mod file_fltk {
         pathonly
     }
 
-    pub fn file_nameonly_fltr(usedir: Rc<RefCell<String>>, extension: &str) -> String {
+    pub fn file_nameonly_fltr(usedir: &String, extension: &str) -> String {
         // Note that the `extension` value must have format  `*.xxxxx`.
 
         // Convert the RefCell contents to a String.
-        let rc_contents: String = usedir.borrow().clone();
+        //let rc_contents: String = usedir.borrow().clone();
 
         // Convert the text of the starting directory into a PATH.
-        let strtpath = Path::new(rc_contents.as_str());
+        let strtpath = Path::new(usedir.as_str());
         if !strtpath.exists() {
             eprintln!("The path {} does not exist!", strtpath.display());
         }
@@ -257,9 +257,59 @@ pub mod file_fltk {
 
 
 pub mod file_mngmnt {
-    use std::{path::Path, fmt::Debug, fs, fs::File, str::FromStr};
-    use std::io::{BufRead, BufReader, Write};
-    use lib_jt::{misc::*, input_utilities::*};
+    use lib_jt::{input_utilities::*, misc::*};
+    use std::io::{BufRead, BufReader, Read, Write};
+    use std::{fmt::Debug, fs, fs::File, io, path::Path, str::FromStr};
+
+
+    /*
+
+        fn main() {
+        let file_path = "/home/jtreagan/programming/rust/mine/cards/front_files_list.txt"; // Replace with your file path
+        let vec = file_read_csv_to_vector(file_path);
+
+        println!("\n {:?} \n", vec); // Print the resulting vector
+}
+
+    */  // Example for file_read_csv_to_vector()
+    pub fn file_read_csv_to_vector(file_path: &str) -> Vec<String> {  // Comma delimited
+        // Read the file into a string
+        let content = fs::read_to_string(file_path).expect("Failed to read the file");
+
+        // Split the content by commas and collect into a vector
+        content.split(',')
+            .map(|s| s.trim().to_string()) // Trim whitespace off each element
+            .collect()
+    }
+
+    /*  ******  Example for  file_read_file_to_string()   *****
+    fn main() {
+        let filename = "/home/jtreagan/programming/rust/mine/tr_rbld1/David_config.yaml";
+
+        match file_read_file_to_string(filename) {
+            Ok(contents) => {
+                println!("\n The file contents is:\n{} \n", contents);
+            }
+            Err(err) => {
+                eprintln!("\n Error reading the file: {} \n", err);
+            }
+        }
+    }
+
+ */  // Example for  file_read_file_to_string()
+    pub fn file_read_file_to_string(fname: &str) -> io::Result<String> {
+        // Attempt to open the file
+        let mut file = File::open(fname)?;
+
+        // Prepare a String to store the file's contents
+        let mut contents = String::new();
+
+        // Read the file's contents into the string
+        file.read_to_string(&mut contents)?;
+
+        // Return the contents
+        Ok(contents)
+    }
 
     pub fn file_path_to_fname(pathstr: &String) -> String {
         let usepath = Path::new(pathstr);
@@ -285,8 +335,7 @@ pub mod file_mngmnt {
 
         println!("\n In main() the list of files is \n {:?}", file_names);
     }
-  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */  // ******* Example for file_get_dir_list() ******
     pub fn file_get_dir_list(path: &str) -> Vec<String> {
         let dir_entries = fs::read_dir(path).unwrap();
 
@@ -298,7 +347,6 @@ pub mod file_mngmnt {
 
         file_names
     }
-
 
     /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -314,14 +362,12 @@ pub mod file_mngmnt {
         println!("\n The chosen menu item is:   {}", chosen);
     }
 
-  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */  // ******* Example for file_namemenu() ******
     pub fn file_namemenu(fnames: &Vec<String>) -> String {
         let choice = activity_menu(&fnames, "\n Please choose which file you want to use \n");
         let chosen = &fnames[choice - 1];
         chosen.to_string()
     }
-
 
     /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

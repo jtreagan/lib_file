@@ -34,11 +34,16 @@ fn splash() {
 
 
 fn main() {
-    let usepath = Rc::new(RefCell::new("/home/jtreagan/programming/rust/mine".to_string()));
+    let filename = "/home/jtreagan/programming/rust/mine/tr_rbld1/David_config.yaml";
 
-    let pathstr = file_nameonly(usepath);
-
-    println!("\n In  main()  the chosen path is:  {} \n", pathstr);
+    match file_read_file_to_string(filename) {
+        Ok(contents) => {
+            println!("\n The file contents is:\n{} \n", contents);
+        }
+        Err(err) => {
+            eprintln!("\n Error reading the file: {} \n", err);
+        }
+    }
 }
 
 
