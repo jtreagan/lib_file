@@ -297,7 +297,7 @@ pub mod file_mngmnt {
     }
 
  */  // Example for  file_read_file_to_string()
-    pub fn file_read_file_to_string(fname: &str) -> io::Result<String> {
+    pub fn file_read_to_string(fname: &str) -> io::Result<String> {
         // Attempt to open the file
         let mut file = File::open(fname)?;
 
