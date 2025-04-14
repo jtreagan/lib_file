@@ -36,15 +36,8 @@ fn splash() {
 fn main() {
     let filename = "/home/jtreagan/programming/rust/mine/tr_rbld1/David_config.yaml";
 
-    match file_read_file_to_string(filename) {
-        Ok(contents) => {
-            println!("\n The file contents is:\n{} \n", contents);
-        }
-        Err(err) => {
-            eprintln!("\n Error reading the file: {} \n", err);
-        }
+    file_browse_save_fltr(&filename.to_string(), "*.yaml");
     }
-}
 
 
 

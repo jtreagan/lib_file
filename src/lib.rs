@@ -29,18 +29,21 @@ pub mod file_fltk {
     use std::path::Path;
 
     pub fn file_browse_save(usedir: &String) -> String {
-        // Convert the RefCell contents to a String.
-        //let rc_contents: String = usedir.borrow().clone();
 
-        // Convert the text of the starting directory into a PATH.
+        // region Convert the text of the starting directory into a PATH & check exists.
         let strtpath = Path::new(usedir.as_str());
         if !strtpath.exists() {
             eprintln!("The path {} does not exist!", strtpath.display());
         }
+        // endregion
 
         // Set the dialog browser to the default directory.
-        let mut dialog = dialog::NativeFileChooser::new(dialog
-                ::NativeFileChooserType::BrowseSaveFile);
+        let mut dialog = dialog::NativeFileChooser
+                                ::new(dialog::NativeFileChooserType
+                                ::BrowseSaveFile);
+
+        dialog.set_preset_file(usedir); // Set the suggested file name
+
         let setrslt = dialog.set_directory(&strtpath);
         if let Err(e) = setrslt {
             eprintln!("Failed to set starting directory to:  {}", e);
@@ -61,19 +64,20 @@ pub mod file_fltk {
     pub fn file_browse_save_fltr(usedir: &String, extension: &str) -> String{
         // Note that the `extension` value must have format  "*.xxxxx"
 
-        // Convert the RefCell contents to a String.
-        //let rc_contents: String = usedir.borrow().clone();
-
-        // Convert the text of the starting directory into a PATH.
+        // region Convert the text of the starting directory into a PATH.
         let strtpath = Path::new(usedir.as_str());
         if !strtpath.exists() {
             eprintln!("The path {} does not exist!", strtpath.display());
         }
+        // endregion
 
         // Set the dialog browser to the default directory.
         let mut dialog = dialog::NativeFileChooser
-            ::new(dialog::NativeFileChooserType
-            ::BrowseSaveFile);
+                                ::new(dialog::NativeFileChooserType
+                                ::BrowseSaveFile);
+
+        dialog.set_preset_file(usedir); // Set the suggested file name
+
         dialog.set_filter(extension);
         let setrslt = dialog.set_directory(&strtpath);
         if let Err(e) = setrslt {
@@ -88,8 +92,6 @@ pub mod file_fltk {
 
 
     pub fn file_fullpath(usedir: &String) -> String {
-        // Convert the RefCell contents to a String.
-        //let rc_contents: String = usedir.borrow().clone();
 
         // Convert the text of the starting directory into a PATH.
         let strtpath = Path::new(usedir.as_str());
@@ -282,13 +284,13 @@ pub mod file_mngmnt {
             .collect()
     }
 
-    /*  ******  Example for  file_read_file_to_string()   *****
+    /*  ******  Example for  file_read_to_string()   *****
     fn main() {
         let filename = "/home/jtreagan/programming/rust/mine/tr_rbld1/David_config.yaml";
 
-        match file_read_file_to_string(filename) {
+        match file_read_to_string(filename) {
             Ok(contents) => {
-                println!("\n The file contents is:\n{} \n", contents);
+                println!("\n The file contents is:  \n{} \n", contents);
             }
             Err(err) => {
                 eprintln!("\n Error reading the file: {} \n", err);
@@ -296,8 +298,10 @@ pub mod file_mngmnt {
         }
     }
 
- */  // Example for  file_read_file_to_string()
+ */  // Example for  file_read_to_string()
     pub fn file_read_to_string(fname: &str) -> io::Result<String> {
+        // TODO: This needs better error handling.
+
         // Attempt to open the file
         let mut file = File::open(fname)?;
 
