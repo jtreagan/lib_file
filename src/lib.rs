@@ -20,9 +20,6 @@ pub mod file_fltk {
 
     -- Need to deal with the result returned by
             dialog.set_directory(&strtpath);
-
-    -- Change out the  RefCell  parameters for  String.  Works better.
-
 */
 
     use fltk::dialog;
@@ -259,6 +256,17 @@ pub mod file_fltk {
 
 
 pub mod file_mngmnt {
+
+    /*
+        Note the following:
+            1. I wrote these functions early-on while I was still learning Rust
+                and the code quality reflects that.
+
+            2. While the previous module -- file_fltk -- is dependent on the
+                FLTK-RS crate, the functions in this module rely on the Rust
+                standard crate.
+    */
+
     use lib_jt::{input_utilities::*, misc::*};
     use std::io::{BufRead, BufReader, Read, Write};
     use std::{fmt::Debug, fs, fs::File, io, path::Path, str::FromStr};
