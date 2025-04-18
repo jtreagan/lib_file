@@ -5,8 +5,17 @@
                                 To Do List
 
     -- Write examples for functions that don't already have one.
-
+    -- Note that examples should have some meat to them.  assert!() macros
+        are fine, but if someone is interested in using one of these
+        functions they will need an example that actually does something.
 */
+
+const VERSION: &str = "0.0.5";
+const AUTHOR: &str = "John T. Reagan";
+const LICENSE: &str = "MIT";
+const LICENSE_URL: &str = "https://opensource.org/licenses/MIT";
+const COPYRIGHT: &str = "Copyright (c) 2025, John T. Reagan";
+const REPOSITORY: &str = "https://github.com/jtreagan/lib_file";
 
 pub mod file_fltk {
 
