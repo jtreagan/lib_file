@@ -522,9 +522,6 @@ pub mod file_mngmnt {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
     pub fn file_choose_from_existing(extsn: &str) -> (String, String) {
-
-
-
         let dirpath = input_string_prompt("Please enter the path for the directory where this file has been saved:  ");
         let dirok = dir_checkexist_fix(&dirpath);
         if dirok.0 == false {
