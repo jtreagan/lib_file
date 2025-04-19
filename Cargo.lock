@@ -153,16 +153,15 @@ name = "lib_file"
 version = "0.1.0"
 dependencies = [
  "fltk",
- "lib_jt",
+ "lib_utils",
 ]
 
 [[package]]
-name = "lib_jt"
+name = "lib_utils"
 version = "0.1.0"
+source = "git+https://github.com/jtreagan/lib_utils.git#477400d881ee4980352b5ff5246ac633297a12f8"
 dependencies = [
- "console",
  "dialoguer",
- "fltk",
  "rand",
 ]
 

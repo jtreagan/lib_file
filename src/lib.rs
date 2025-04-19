@@ -10,14 +10,14 @@
         functions they will need an example that actually does something.
 */
 
-// region Credit Constants
-const _VERSION: &str = "0.0.5";
-const _AUTHOR: &str = "John T. Reagan";
-const _LICENSE: &str = "MIT";
-const _LICENSE_URL: &str = "https://opensource.org/licenses/MIT";
-const _COPYRIGHT: &str = "Copyright (c) 2025, John T. Reagan";
-const _REPOSITORY: &str = "https://github.com/jtreagan/lib_file";
-// endregion
+/*
+VERSION = "0.0.5";
+AUTHOR = "John T. Reagan";
+LICENSE = "MIT";
+LICENSE_URL = "https://opensource.org/licenses/MIT";
+COPYRIGHT = "Copyright (c) 2025, John T. Reagan";
+REPOSITORY = "https://github.com/jtreagan/lib_file";
+*/
 
 pub mod file_fltk {
 
@@ -278,7 +278,7 @@ pub mod file_mngmnt {
                 standard crate.
     */
 
-    use lib_jt::{input_utilities::*, misc::*};
+    use lib_utils::{input_utilities::*, misc::*};
     use std::io::{BufRead, BufReader, Read, Write};
     use std::{fmt::Debug, fs, fs::File, io, path::Path, str::FromStr};
 
@@ -416,8 +416,6 @@ pub mod file_mngmnt {
         extensions
     }
 
-
-
     pub fn file_remove_extension(filename: &str) -> String {
         let path = Path::new(filename);
         match path.file_stem() {
@@ -425,7 +423,6 @@ pub mod file_mngmnt {
             None => String::from(filename),
         }
     }
-
 
     /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -451,7 +448,6 @@ pub mod file_mngmnt {
             ext_a.cmp(ext_b)
         });
     }
-
 
     /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -490,7 +486,7 @@ pub mod file_mngmnt {
     }
 
     pub fn file_save_vec<T: std::fmt::Display>(fname: &str, vector: &[T]) ->
-                                                          std::io::Result<()> {
+                                                         std::io::Result<()> {
         let mut file = File::create(fname)?;
         for num in vector {
             let num_str = num.to_string();
@@ -499,7 +495,6 @@ pub mod file_mngmnt {
         }
         Ok(())
     }
-
 
     /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -547,7 +542,6 @@ pub mod file_mngmnt {
         let chosen = file_namemenu(&file_names);
         (dirpath, chosen)
     }
-
 
     /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
