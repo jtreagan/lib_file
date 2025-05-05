@@ -8,5 +8,5 @@ edition = "2021"
 fltk = { version = "^1.4", features = ["fltk-bundled"] }
 
 # Reagan created crates
-lib_utils = { git = "https://github.com/jtreagan/lib_utils.git" }
+lib_utils = {git = "https://github.com/jtreagan/lib_utils.git" }
 

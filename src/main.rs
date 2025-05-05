@@ -20,7 +20,6 @@ use std::rc::Rc;
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use std::convert::From;
-//use fltk::*;
 use lib_file::file_mngmnt::*;
 use lib_file::file_fltk::*;
 
@@ -36,7 +35,7 @@ fn splash() {
 fn main() {
     let filename = "/home/jtreagan/programming/rust/mine/tr_rbld1/David_config.yaml";
 
-    file_browse_save_fltr(&filename.to_string(), "*.yaml");
+    file_browse_save(&filename.to_string());
     }
 
 

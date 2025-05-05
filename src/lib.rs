@@ -1,14 +1,19 @@
-/*
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                    Functions for use in Managing File IO
 
-                                To Do List
+//! # Functions for use in Managing File IO
+//! The functions in the modules below were written to help
+//! manage file paths and file names and other file-based
+//! operations.  I've used them in several different projects
+//! which is why I've kept them together in a separate crate.
+//! Their greatest weakness is poor error handling, so keep that
+//! in mind if you choose to use them.  I need help getting that
+//! corrected, so if you feel like taking that on, please check
+//! out the issues tab in this crate's repository.
 
-    -- Write examples for functions that don't already have one.
-    -- Note that examples should have some meat to them.  assert!() macros
-        are fine, but if someone is interested in using one of these
-        functions they will need an example that actually does something.
-*/
+// todo: Write examples for functions that don't already have one.
+//      Note that examples should have some meat to them.
+//      assert!() macros are fine, but if someone is interested
+//      in using one of these functions will need an example
+//      that actually does something.
 
 /*
 VERSION = "0.0.5";
@@ -17,25 +22,25 @@ LICENSE = "MIT";
 LICENSE_URL = "https://opensource.org/licenses/MIT";
 COPYRIGHT = "Copyright (c) 2025, John T. Reagan";
 REPOSITORY = "https://github.com/jtreagan/lib_file";
-*/
+*/   // Credits
 
+//! ## Functions based on the fltk::dialog module.
 pub mod file_fltk {
 
-/*
-                                TO DO
+    // todo: The file browser is forcing the choice of whatever
+    //      folder is at the end of the branch.  It won't let
+    //      the user choose some folder in the middle of the
+    //      branch.  Fix it.
 
-    -- The file browser is forcing the choice of whatever
-            folder is at the end of the branch.  It won't let
-            the user choose some folder in the middle of the
-            branch.  Fix it.
+    // todo: Need to deal with the result returned by
+    //      dialog.set_directory() wherever it appears
+    //      in the functions of this module.
 
-    -- Need to deal with the result returned by
-            dialog.set_directory(&strtpath);
-*/
 
     use fltk::dialog;
     use std::path::Path;
 
+    /// Browse to a desired directory, return a string to use as a path for saving.
     pub fn file_browse_save(usedir: &String) -> String {
 
         // region Convert the text of the starting directory into a PATH & check exists.
@@ -62,6 +67,10 @@ pub mod file_fltk {
         let path = dialog.filename().to_str().unwrap().to_string();
         path
     }
+
+
+    /// Browse to a desired directory, filter the directory by the passed extension,
+    /// return a string to use as a path for saving.
 
     /*
                     Sample Usage --   file_browse_save_fltr()
@@ -98,7 +107,8 @@ pub mod file_fltk {
         path
     }
 
-
+    /// Browse to a desired directory, return a string to use as a path.
+    /// Returned string includes both the path and the file name.
     pub fn file_fullpath(usedir: &String) -> String {
 
         // Convert the text of the starting directory into a PATH.
@@ -122,6 +132,8 @@ pub mod file_fltk {
         path
     }
 
+    /// Browse to a desired directory, return a string to use as a path for saving.
+    /// Returned string includes both the path only, without the file name.
     pub fn file_pathonly(usedir: &String) -> String {
         // Convert the RefCell contents to a String.
         //let rc_contents: String = usedir.borrow().clone();
@@ -147,6 +159,7 @@ pub mod file_fltk {
         pathonly
     }
 
+    /// Browse to a desired directory, return the chosen file name only.
     pub fn file_nameonly(usedir: &String) -> String {
         // Convert the RefCell contents to a String.
         //let rc_contents: String = usedir.borrow().clone();
@@ -176,7 +189,8 @@ pub mod file_fltk {
         filename_string
     }
 
-
+    /// Browse to a desired directory, filter the files by the passed extension.
+    /// The returned string includes both the path and the file name.
     pub fn file_fullpath_fltr(usedir: &String, extension: &str) -> String {
         // Note that the `extension` value must have format  `*.xxxxx`.
 
@@ -204,6 +218,8 @@ pub mod file_fltk {
         path
     }
 
+    /// Browse to a desired directory, filter the files by the passed extension.
+    /// The returned string includes both the path only.
     pub fn file_pathonly_fltr(usedir: &String, extension: &str) -> String {
         // Note that the `extension` value must have format  `*.xxxxx`.
 
@@ -231,6 +247,8 @@ pub mod file_fltk {
         pathonly
     }
 
+    /// Browse to a desired directory, filter the files by the passed extension.
+    /// The returned string includes only the file name.
     pub fn file_nameonly_fltr(usedir: &String, extension: &str) -> String {
         // Note that the `extension` value must have format  `*.xxxxx`.
 
@@ -265,18 +283,15 @@ pub mod file_fltk {
 
 }  // End file_fltk module.
 
-
+/// Terminal-based file i/o functions.
 pub mod file_mngmnt {
 
-    /*
-        Note the following:
-            1. I wrote these functions early-on while I was still learning Rust
-                and the code quality reflects that.
-
-            2. While the previous module -- file_fltk -- is dependent on the
-                FLTK-RS crate, the functions in this module rely on the Rust
-                standard crate.
-    */
+    /// ## Note the following:
+    ///     * I wrote these functions early-on while I was still
+    ///         learning Rust and the code quality reflects that.
+    ///     * While the previous module -- file_fltk -- is
+    ///         dependent on the FLTK-RS crate, the functions in
+    ///         this module rely on the Rust standard crates only.
 
     use lib_utils::{input_utilities::*, misc::*};
     use std::io::{BufRead, BufReader, Read, Write};
