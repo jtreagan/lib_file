@@ -1,12 +1,13 @@
 
 //! # Functions for use in Managing File IO
 //! The functions in the modules below were written to help
-//! manage file paths and file names and other file-based
+//! manage file paths, file names, and other file-based
 //! operations.  I've used them in several different projects
 //! which is why I've kept them together in a separate crate.
 //! Their greatest weakness is poor error handling, so keep that
-//! in mind if you choose to use them.  I need help getting that
-//! corrected, so if you feel like taking that on, please check
+//! in mind if you choose to use them.  By the way, I need help getting
+//! those weaknesses corrected, so if you feel like taking that on,
+//! please check
 //! out the issues tab in this crate's repository.
 
 // todo: Write examples for functions that don't already have one.
@@ -24,7 +25,7 @@ COPYRIGHT = "Copyright (c) 2025, John T. Reagan";
 REPOSITORY = "https://github.com/jtreagan/lib_file";
 */   // Credits
 
-//! ## Functions based on the fltk::dialog module.
+/// Functions based on the fltk::dialog module.
 pub mod file_fltk {
 
     // todo: The file browser is forcing the choice of whatever
@@ -286,12 +287,14 @@ pub mod file_fltk {
 /// Terminal-based file i/o functions.
 pub mod file_mngmnt {
 
-    /// ## Note the following:
-    ///     * I wrote these functions early-on while I was still
-    ///         learning Rust and the code quality reflects that.
-    ///     * While the previous module -- file_fltk -- is
-    ///         dependent on the FLTK-RS crate, the functions in
-    ///         this module rely on the Rust standard crates only.
+//! Note the following:
+//! 1) I wrote these functions early-on while I was still
+//!     learning Rust and the code quality reflects that.
+//! 2) While the previous module -- file_fltk -- is
+//!     dependent on the FLTK-RS crate, the functions in
+//!     this module rely on the Rust standard crates along with
+//!     some functions from `lib_utils`, another of my personal
+//!     crates.
 
     use lib_utils::{input_utilities::*, misc::*};
     use std::io::{BufRead, BufReader, Read, Write};
@@ -308,6 +311,7 @@ pub mod file_mngmnt {
 }
 
     */  // Example for file_read_csv_to_vector()
+    /// Read a comma delimited file and collect its contents into a vector.
     pub fn file_read_csv_to_vector(file_path: &str) -> Vec<String> {  // Comma delimited
         // Read the file into a string
         let content = fs::read_to_string(file_path).expect("Failed to read the file");
@@ -333,6 +337,8 @@ pub mod file_mngmnt {
     }
 
  */  // Example for  file_read_to_string()
+    /// Read a file's contents into a String and return
+    /// it as a String.
     pub fn file_read_to_string(fname: &str) -> io::Result<String> {
         // TODO: This needs better error handling.
 
@@ -349,7 +355,9 @@ pub mod file_mngmnt {
         Ok(contents)
     }
 
+    /// Pull the file name off of the end of a path and return it.
     pub fn file_path_to_fname(pathstr: &String) -> String {
+        // todo: This doesn't look right.  Check it out.
         let usepath = Path::new(pathstr);
 
         match usepath.file_name() {
@@ -374,6 +382,8 @@ pub mod file_mngmnt {
         println!("\n In main() the list of files is \n {:?}", file_names);
     }
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */  // ******* Example for file_get_dir_list() ******
+    /// Read a folder directory collecting the filenames into a vector.
+    /// Return the vector.
     pub fn file_get_dir_list(path: &str) -> Vec<String> {
         let dir_entries = fs::read_dir(path).unwrap();
 
@@ -401,6 +411,8 @@ pub mod file_mngmnt {
     }
 
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */  // ******* Example for file_namemenu() ******
+    /// Create a menu from a vector of file names.  Returns the item chosen
+    /// by the user as a String.
     pub fn file_namemenu(fnames: &Vec<String>) -> String {
         let choice = activity_menu(&fnames, "\n Please choose which file you want to use \n");
         let chosen = &fnames[choice - 1];
@@ -420,8 +432,10 @@ pub mod file_mngmnt {
 
         println!("\n In main() the list of extensions is \n {:?}", extns);
     }
-  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */  // Example for file_extract_extensions()
+    /// Given a list of file names, this functioncollects all extensions
+    /// into a vector
+    /// and returns the vector.
     pub fn file_extract_extensions(filelist: &Vec<String>) -> Vec<String> {
         let mut extensions: Vec<String> = Vec::new();
 
@@ -431,6 +445,7 @@ pub mod file_mngmnt {
         extensions
     }
 
+    /// Removes the extension from a file name.  Returns the modified file name.
     pub fn file_remove_extension(filename: &str) -> String {
         let path = Path::new(filename);
         match path.file_stem() {
@@ -454,8 +469,8 @@ pub mod file_mngmnt {
         println!("\n After:   {:?}", file_names);
     }
 
-  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */  //Example for file_sort_by_ext()
+    /// Sorts a vector of file names by their extensions.
     pub fn file_sort_by_ext(vctr: &mut Vec<String>) {
         vctr.sort_by(|a, b| {
             let ext_a = a.split('.').last().unwrap();
@@ -482,12 +497,14 @@ pub mod file_mngmnt {
         println!("\n After:   {:?}", file_names);
     }
 
-  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
-    pub fn file_del_unwanted_names(vctr: &mut Vec<String>, keeper: &str) {
-        vctr.retain(|item| (item.split('.').last().unwrap()) == keeper);
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */  // Example for file_del_unwanted_names()
+    /// Deletes from the given vector all elements that do not have an
+    /// extension that matches a passed extension.
+    pub fn file_del_unwanted_names(vctr: &mut Vec<String>, keeper_ext: &str) {
+        vctr.retain(|item| (item.split('.').last().unwrap()) == keeper_ext);
     }
 
+    /// Read the elements from a given file, storing them in a passed vector.
     pub fn file_read_to_vec<T: FromStr>(fname: &str, vctr: &mut Vec<T>)
         where <T as FromStr>::Err: Debug {
         let file = File::open(fname).unwrap();
@@ -500,6 +517,7 @@ pub mod file_mngmnt {
         }
     }
 
+    /// Saves a vector to a file.
     pub fn file_save_vec<T: std::fmt::Display>(fname: &str, vector: &[T]) ->
                                                          std::io::Result<()> {
         let mut file = File::create(fname)?;
@@ -529,8 +547,10 @@ pub mod file_mngmnt {
     }
 
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */  // Example for file_choose_from_existing()
+    /// Lets the user input a path string, checks that path for validity, then
+    /// lets the user choose a file to work with.  Returns both
+    /// the path and the chosen file name.
     pub fn file_choose_from_existing(extsn: &str) -> (String, String) {
         let dirpath = input_string_prompt("Please enter the path for the directory where this file has been saved:  ");
         let dirok = dir_checkexist_fix(&dirpath);
@@ -573,8 +593,8 @@ pub mod file_mngmnt {
             println!("\n All is okay!!  :>) \n");
         }
 
-  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */  //Example for file_choose_new_fname
+    /// Choose/create a new name for your file.
     pub fn file_choose_new_fname(extnsn: &str, dirpath: &String) -> String {
         let mut fname: String;
         let mut usepath: String;
@@ -584,7 +604,7 @@ pub mod file_mngmnt {
             if fname.split('.').last().unwrap() != extnsn {
                 fname = fname + "." + extnsn;
             }
-            usepath = usepath + "/" + fname.as_str();
+            usepath = usepath + "/" + fname.as_str();  // Try using format!() here.
             let fullpath = Path::new(&usepath);
             let exists = fullpath.try_exists()
                 .expect("Error when checking the existence of the file");
@@ -599,6 +619,7 @@ pub mod file_mngmnt {
         usepath
     }
 
+    /// Input a file name and append an extension to it.
     pub fn file_getfname_addextsn(extnsn: &str) -> String {
         let mut fname = input_string_prompt("\n Please enter a name for your new file:  ");
         if fname.split('.').last().unwrap() != extnsn {
@@ -608,6 +629,7 @@ pub mod file_mngmnt {
 
     }
 
+    /// Add an extension to a file name.
     pub fn file_addextsn(extnsn: &str, fname: &String) -> String {
         let mut usename = fname.clone();
         if usename.split('.').last().unwrap() != extnsn {
@@ -616,9 +638,9 @@ pub mod file_mngmnt {
         usename
     }
 
+    /// This function is not yet finished.  Don't use it.
     pub fn file_chkfname( fname: &String, dirpath: &String) -> String {
 // This is not yet ready.  What are you returning?
-
 
         let mut usepath: String;
         loop {
@@ -640,8 +662,6 @@ pub mod file_mngmnt {
         usepath
     }
 
-
-
     /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
             ******* Example for dir_checkexist_fix() ******
@@ -660,8 +680,8 @@ pub mod file_mngmnt {
         }
     }
 
- */
-
+ */  // Example for dir_checkexist_fix()
+    /// Check the validity of a directory path and correct it if necessary.
     pub fn dir_checkexist_fix(dirpath: &String) -> (bool, String) {
         let mut fullpath = Path::new(dirpath.as_str());
         let mut newpath: String = dirpath.to_string().clone();
@@ -708,14 +728,15 @@ fn main() {
     }
 }
 
-*/
-
-    pub fn dir_check_empty(dirpath: &str) -> std::io::Result<bool> {
+*/  // Example for dir_check_empty()
+    /// Check to see if a directory is empty.
+    pub fn dir_check_empty(dirpath: &str) -> io::Result<bool> {
         let mut entries = fs::read_dir(dirpath)?;
         let first_entry = entries.next();
         Ok(first_entry.is_none())
     }
 
+    /// Check a user-entered path for validity.
     pub fn dir_get_path() -> (bool, String) {
         let dirpath = input_string_prompt(
             "\n Please enter a path for the directory in which you wish to save this file.  \n\
@@ -731,6 +752,8 @@ fn main() {
         (true, dirpath)
     }
 
+    /// Same as `dir_get_path` except that one can pass whatever prompt
+    /// you like to the function.
     pub fn dir_get_path_prompt(prompt: &str) -> (bool, String) {
         let dirpath = input_string_prompt( prompt);
         let dirok = dir_checkexist_fix(&dirpath);
