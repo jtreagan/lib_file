@@ -2,19 +2,6 @@
 #![allow(unused)]
 
 
-/*
-    ~~~~~~~~~~~~~~~~~~~~~~~  Notes  ~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
- */
-
-/*
-    ~~~~~~~~~~~~~~~~~~~~~~~  Goals  ~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-
- */
-
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::ffi::OsStr;
@@ -36,7 +23,7 @@ fn main() {
     let filename = "/home/jtreagan/programming/rust/mine/tr_rbld1/David_config.yaml";
 
     file_browse_save(&filename.to_string());
-    }
+}
 
 
 
