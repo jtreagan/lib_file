@@ -10,7 +10,7 @@ use std::convert::From;
 use lib_file::file_mngmnt::*;
 use lib_file::file_fltk::*;
 
-const PROGRAM_TITLE: &str = "File Management Function Library";
+const PROGRAM_TITLE: &str = "File-Management Function Library";
 const VERSION: &str = "0.2.0";
 
 fn splash() {

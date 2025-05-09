@@ -1,7 +1,13 @@
 [package]
 name = "lib_file"
 version = "0.1.0"
+authors = "John T. Reagan"
 edition = "2021"
+license = "MIT"
+description = "File handling utility functions."
+readme = "https://github.com/jtreagan/lib_file/README.MD"
+repository = "https://github.com/jtreagan/lib_file"
+keywords = "file, file utilities, file handling utilities"
 
 [dependencies]
 # Non-standard crates

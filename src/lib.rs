@@ -1,5 +1,5 @@
 
-//! # Functions for use in Managing File IO
+//! # lib_file -- Functions for use in Managing File IO
 //! The functions in the modules below were written to help
 //! manage file paths, file names, and other file-based
 //! operations.  I've used them in several different projects
