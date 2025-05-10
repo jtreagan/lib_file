@@ -1,5 +1,5 @@
 
-//! # lib_file -- Functions for use in Managing File IO
+//! # Functions for use in Managing File IO
 //! The functions in the modules below were written to help
 //! manage file paths, file names, and other file-based
 //! operations.  I've used them in several different projects
@@ -9,17 +9,16 @@
 //! those weaknesses corrected, so if you feel like taking that on,
 //! please check
 //! out the issues tab in this crate's repository.
+//!
+//!
+//!    * VERSION = "0.0.5";
+//!    * AUTHOR = "John T. Reagan";
+//!    * LICENSE = "MIT";
+//!    * LICENSE_URL = "<https://opensource.org/licenses/MIT>";
+//!    * COPYRIGHT = "Copyright (c) 2025, John T. Reagan";
+//!    * REPOSITORY = "<https://github.com/jtreagan/lib_file>";
 
-/*
-VERSION = "0.0.5";
-AUTHOR = "John T. Reagan";
-LICENSE = "MIT";
-LICENSE_URL = "https://opensource.org/licenses/MIT";
-COPYRIGHT = "Copyright (c) 2025, John T. Reagan";
-REPOSITORY = "https://github.com/jtreagan/lib_file";
-*/   // Credits
-
-/// Functions based on the fltk::dialog module.
+/// # Functions based on the fltk::dialog module.
 pub mod file_fltk {
 
     use fltk::dialog;
@@ -269,12 +268,12 @@ pub mod file_fltk {
     }
 
 
-}  // End file_fltk module.
+}
 
-/// Terminal-based file i/o functions.
+/// # Terminal-based file i/o functions.
 pub mod file_mngmnt {
 
-//! Note the following:
+//! ### Note the following:
 //! 1) I wrote these functions early-on while I was still
 //!     learning Rust and the code quality reflects that.
 //! 2) While the previous module -- file_fltk -- is
@@ -286,6 +285,29 @@ pub mod file_mngmnt {
     use lib_utils::{input_utilities::*, misc::*};
     use std::io::{BufRead, BufReader, Read, Write};
     use std::{fmt::Debug, fs, fs::File, io, path::Path, str::FromStr};
+    use std::cell::RefCell;
+    use std::rc::Rc;
+
+    /// Read a file to a String and print that String to the terminal.
+    ///
+    pub fn file_read_print_to_term(fname: String) {
+        let mut file = File::open(fname.as_str()).expect("Can't open file!");
+        let mut contents = String::new();
+        file.read_to_string(&mut contents).expect("Oops!  Cant read file...");
+
+        println!("{}", contents);
+    }
+
+    /// Read a file to a String with the file name passed
+    /// to the function as a RefCell.
+    pub fn file_read_file_to_string_refcell(fname: &Rc<RefCell<String>>) -> String {
+        let usefname = fname.borrow().clone();
+
+        let mut file = File::open(usefname.as_str()).expect("Can't open file!");
+        let mut contents = String::new();
+        file.read_to_string(&mut contents).expect("Oops!  Cant read file...");
+        contents
+    }
 
     /// Read a comma delimited file and collect its contents into a vector.
     ///
@@ -734,5 +756,5 @@ pub mod file_mngmnt {
 
 
 
-} // End file_mngmnt module.
+}
 
