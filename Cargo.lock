@@ -150,7 +150,7 @@ dependencies = [
 
 [[package]]
 name = "lib_file"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "fltk",
  "lib_utils",
@@ -158,8 +158,9 @@ dependencies = [
 
 [[package]]
 name = "lib_utils"
-version = "0.1.0"
-source = "git+https://github.com/jtreagan/lib_utils.git#477400d881ee4980352b5ff5246ac633297a12f8"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4f3ac826c3d092a4f441cf423847c0b688e330a6a57e84e4dba85d89c18dcd12"
 dependencies = [
  "dialoguer",
  "rand",

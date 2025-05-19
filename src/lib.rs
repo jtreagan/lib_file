@@ -11,7 +11,7 @@
 //! out the issues tab in this crate's repository.
 //!
 //!
-//!    * VERSION = "0.0.5";
+//!    * VERSION = "0.1.2";
 //!    * AUTHOR = "John T. Reagan";
 //!    * LICENSE = "MIT";
 //!    * LICENSE_URL = "<https://opensource.org/licenses/MIT>";
@@ -282,7 +282,7 @@ pub mod file_mngmnt {
 //!     some functions from `lib_utils`, another of my personal
 //!     crates.  These functions are all terminal-based.
 
-    use lib_utils::{input_utilities::*, misc::*};
+    use lib_utils::{input_utilities::*, utilities::*};
     use std::io::{BufRead, BufReader, Read, Write};
     use std::{fmt::Debug, fs, fs::File, io, path::Path, str::FromStr};
     use std::cell::RefCell;
@@ -422,7 +422,7 @@ pub mod file_mngmnt {
     ///     }
     ///
     pub fn file_namemenu(fnames: &Vec<String>) -> String {
-        let choice = activity_menu(&fnames, "\n Please choose which file you want to use \n");
+        let choice = util_activity_menu(&fnames, "\n Please choose which file you want to use \n");
         let chosen = &fnames[choice - 1];
         chosen.to_string()
     }

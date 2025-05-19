@@ -1,11 +1,11 @@
 [package]
 name = "lib_file"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["John T. Reagan"]
-edition = "2021"
+edition = "2024"
 license = "MIT"
 description = "File handling utility functions."
-readme = "/home/jtreagan/programming/rust/mine/lib_file/README.MD"
+readme = "/home/jtreagan/programming/published/lib_file/README.MD"
 repository = "https://github.com/jtreagan/lib_file"
 #keywords = ["file, file utilities"]
 
@@ -13,6 +13,7 @@ repository = "https://github.com/jtreagan/lib_file"
 # Non-standard crates
 fltk = { version = "^1.4", features = ["fltk-bundled"] }
 
-# Reagan created crates
-lib_utils = {git = "https://github.com/jtreagan/lib_utils.git", version = "0.1.0" }
 
+# Reagan created crates
+#lib_utils = {git = "https://github.com/jtreagan/lib_utils.git", version = "^0.1.2" }
+lib_utils = "^0.1.2"
