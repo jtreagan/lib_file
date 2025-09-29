@@ -7,6 +7,7 @@ use std::rc::Rc;
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use std::convert::From;
+use lib_file::dir_mngmnt::*;
 use lib_file::file_mngmnt::*;
 use lib_file::file_fltk::*;
 
@@ -20,9 +21,9 @@ fn splash() {
 
 
 fn main() {
-    let filename = "/home/jtreagan/programming/rust/mine/tr_rbld1/David_config.yaml";
+    let homedirectory = file_get_home_directory();
 
-    file_browse_save(&filename.to_string());
+    println!("\n {} \n", homedirectory);
 }
 
 

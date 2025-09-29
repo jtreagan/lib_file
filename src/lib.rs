@@ -25,6 +25,7 @@ pub mod file_fltk {
     use std::path::Path;
 
     /// Browse to a desired directory, return a string to use as a path for saving.
+    ///
     pub fn file_browse_save(usedir: &String) -> String {
 
         // region Convert the text of the starting directory into a PATH & check exists.
@@ -177,19 +178,21 @@ pub mod file_fltk {
         filename_string
     }
 
+/*
+
     /// Browse to a desired directory, filter the files by the passed extension.
     /// The returned string includes both the path and the file name.
     pub fn file_fullpath_fltr(usedir: &String, extension: &str) -> String {
         // Note that the `extension` value must have format  `*.xxxxx`.
 
-        // Convert the RefCell contents to a String.
-        //let rc_contents: String = usedir.borrow().clone();
-
-        // Convert the text of the starting directory into a PATH.
-        let strtpath = Path::new(usedir.as_str());
+        // region Convert the text of the starting directory into a PATH.
+        let mut strtpath = Path::new(usedir.as_str());
         if !strtpath.exists() {
             eprintln!("The path {} does not exist!", strtpath.display());
+
+            strtpath = std::env::current_dir().unwrap();
         }
+        // endregion
 
         // Set the dialog browser to the default directory.
         let mut dialog = dialog::NativeFileChooser::new(dialog
@@ -205,6 +208,8 @@ pub mod file_fltk {
         let path = dialog.filename().to_str().unwrap().to_string();
         path
     }
+
+    */
 
     /// Browse to a desired directory, filter the files by the passed extension.
     /// The returned string includes both the path only.
@@ -267,6 +272,79 @@ pub mod file_fltk {
 
         filename_string
     }
+
+
+}
+
+/// # Functions dealing with directories.
+pub mod dir_mngmnt {
+    use std::env;
+
+    /// Checks if the given path corresponds to an existing directory.
+    ///
+    /// This function verifies whether the specified path is a directory on the filesystem.
+    /// It uses the `std::path::Path::is_dir` method, which checks the existence and type of the path.
+    ///
+    /// # Arguments
+    ///
+    /// * `road` - A string slice that holds the file path to be checked.
+    ///
+    /// # Returns
+    ///
+    /// * `true` if the provided path exists and is a directory.
+    /// * `false` otherwise.
+    ///
+    /// # Example
+    ///
+    ///     fn main() {
+    ///         let filename = "";
+    ///
+    ///         let truthornot = file_check_directory(&filename.to_string());
+    ///
+    ///         println!("\n {} \n", truthornot);
+    ///     }
+    ///
+    pub fn file_check_directory(road: &str) -> bool {
+        let path = std::path::Path::new(road);
+        path.is_dir()
+    }
+
+    /// Retrieves the default home directory path of the current user based on the operating system.
+    ///
+    /// # Returns
+    /// * A `String` containing the path to the home directory.
+    ///   - On Windows: Retrieves the value of the `USERPROFILE` environment
+    ///         variable. If unavailable, defaults to `"C:\"`.
+    ///   - On macOS: Retrieves the value of the `HOME` environment variable.
+    ///         If unavailable, defaults to `"/Users"`.
+    ///   - On Linux and other Unix-like systems: Retrieves the value of
+    ///         the `HOME` environment variable. If unavailable,
+    ///         defaults to `"/home"`.
+    ///
+    /// # Platform Support
+    /// - **Windows**: Uses the `USERPROFILE` environment variable.
+    /// - **macOS**: Uses the `HOME` environment variable.
+    /// - **Linux/Unix**: Uses the `HOME` environment variable.
+    ///
+    /// # Example:
+    ///     fn main() {
+    ///         let homedirectory = file_get_home_directory();
+    ///         println!("\n {} \n", homedirectory);
+    ///     }
+    ///
+    /// # Note
+    /// This function does not verify the existence of the retrieved path, it only returns the configured or default home directory.
+    pub fn file_get_home_directory() -> String {
+        if cfg!(windows) {
+            env::var("USERPROFILE").unwrap_or_else(|_| "C:\\".to_string())
+        } else if cfg!(target_os = "macos") {
+            env::var("HOME").unwrap_or_else(|_| "/Users".to_string())
+        } else {
+            // Linux and other Unix-like systems
+            env::var("HOME").unwrap_or_else(|_| "/home".to_string())
+        }
+    }
+
 
 
 }
