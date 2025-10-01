@@ -1,27 +1,18 @@
-#![allow(dead_code)]
-#![allow(unused)]
+//#![allow(dead_code)]
+//#![allow(unused)]
 
 
-use std::cell::RefCell;
-use std::rc::Rc;
-use std::ffi::OsStr;
-use std::path::{Path, PathBuf};
-use std::convert::From;
-use lib_file::dir_mngmnt::*;
-use lib_file::file_mngmnt::*;
 use lib_file::file_fltk::*;
 
-const PROGRAM_TITLE: &str = "File-Management Function Library";
-const VERSION: &str = "0.2.0";
-
-fn splash() {
-    println!("~~~~~~~~~~~~~~  {}  ~~~~~~~~~~~~~~~~", PROGRAM_TITLE);
-    println!("                  VERSION   {}\n\n", VERSION);
-}
-
+/*
+    PROGRAM_TITLE = "File-Management Function Library";
+    VERSION = "0.2.0";
+*/
 
 fn main() {
-    let homedirectory = file_get_home_directory();
+    let usedir = "/home/jtreagan/programming/mine/lib_file".to_string();
+
+    let homedirectory = file_pathonly(&usedir);
 
     println!("\n {} \n", homedirectory);
 }

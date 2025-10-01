@@ -23,6 +23,8 @@ pub mod file_fltk {
 
     use fltk::dialog;
     use std::path::Path;
+    use crate::dir_mngmnt;
+    use crate::dir_mngmnt::*;
 
     /// Browse to a desired directory, return a string to use as a path for saving.
     ///
@@ -123,8 +125,6 @@ pub mod file_fltk {
     /// Browse to a desired directory, return a string to use as a path for saving.
     /// Returned string includes both the path only, without the file name.
     pub fn file_pathonly(usedir: &String) -> String {
-        // Convert the RefCell contents to a String.
-        //let rc_contents: String = usedir.borrow().clone();
 
         // Convert the text of the starting directory into a PATH.
         let strtpath = Path::new(usedir.as_str());
@@ -134,7 +134,7 @@ pub mod file_fltk {
 
         // Set the dialog browser to the default directory.
         let mut dialog = dialog::NativeFileChooser::new(dialog
-                        ::NativeFileChooserType::BrowseFile);
+                        ::NativeFileChooserType::BrowseDir);
         let setrslt = dialog.set_directory(&strtpath);
         if let Err(e) = setrslt {
             eprintln!("Failed to set starting directory to:  {}", e);
@@ -178,46 +178,54 @@ pub mod file_fltk {
         filename_string
     }
 
-/*
+
 
     /// Browse to a desired directory, filter the files by the passed extension.
     /// The returned string includes both the path and the file name.
-    pub fn file_fullpath_fltr(usedir: &String, extension: &str) -> String {
-        // Note that the `extension` value must have format  `*.xxxxx`.
+    ///
+    /// Note that the `extension` value must have format  `*.xxxxx`.
+    /// Note that a file must be highlighted before the dialog will close.
+    pub fn file_fullpath_fltr(mut usedir: &String, extension: &str) -> String {
 
-        // region Convert the text of the starting directory into a PATH.
-        let mut strtpath = Path::new(usedir.as_str());
-        if !strtpath.exists() {
-            eprintln!("The path {} does not exist!", strtpath.display());
+        //todo: Passing usedir as an &String is clumsy.  Find a better way.
 
-            strtpath = std::env::current_dir().unwrap();
+        // region Make sure the directory exists and `startpath` is ready.
+
+        let mut startpath = String::new();
+        if file_check_dir_valid(usedir.as_str()) {
+            startpath = usedir.clone();
+        } else {
+            eprintln!("The path {} does not exist!", usedir);
+            startpath = dir_mngmnt::file_get_home_directory();
+        }
+
+        // Convert strtpath into a PATH.
+        let startpath = Path::new(startpath.as_str());
+        // endregion
+
+        // region Set the dialog browser to the correct directory.
+        let mut dialog = dialog::NativeFileChooser::new(dialog
+                                        ::NativeFileChooserType::BrowseFile);
+        let setrslt = dialog.set_directory(&startpath);
+        if let Err(e) = setrslt {
+            eprintln!("Failed to set starting directory to:  {}", e);
+            // And then what happens??????
         }
         // endregion
 
-        // Set the dialog browser to the default directory.
-        let mut dialog = dialog::NativeFileChooser::new(dialog
-                        ::NativeFileChooserType::BrowseFile);
-        let setrslt = dialog.set_directory(&strtpath);
-        if let Err(e) = setrslt {
-            eprintln!("Failed to set starting directory to:  {}", e);
-        }
         dialog.set_filter(extension);
-
         dialog.show();
 
         let path = dialog.filename().to_str().unwrap().to_string();
         path
     }
 
-    */
+
 
     /// Browse to a desired directory, filter the files by the passed extension.
     /// The returned string includes both the path only.
     pub fn file_pathonly_fltr(usedir: &String, extension: &str) -> String {
         // Note that the `extension` value must have format  `*.xxxxx`.
-
-        // Convert the RefCell contents to a String.
-        //let rc_contents: String = usedir.borrow().clone();
 
         // Convert the text of the starting directory into a PATH.
         let strtpath = Path::new(usedir.as_str());
@@ -226,7 +234,7 @@ pub mod file_fltk {
         }
 
         // Set the dialog browser to the default directory.
-        let mut dialog = dialog::NativeFileChooser::new(dialog::NativeFileChooserType::BrowseFile);
+        let mut dialog = dialog::NativeFileChooser::new(dialog::NativeFileChooserType::BrowseDir);
         dialog.set_filter(extension);
         let setrslt = dialog.set_directory(&strtpath);
         if let Err(e) = setrslt {
@@ -304,7 +312,7 @@ pub mod dir_mngmnt {
     ///         println!("\n {} \n", truthornot);
     ///     }
     ///
-    pub fn file_check_directory(road: &str) -> bool {
+    pub fn file_check_dir_valid(road: &str) -> bool {
         let path = std::path::Path::new(road);
         path.is_dir()
     }
