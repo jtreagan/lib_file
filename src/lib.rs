@@ -21,6 +21,8 @@
 /// # Functions based on the fltk::dialog module.
 pub mod file_fltk {
 
+    //todo: Passing usedir as an &String is clumsy.  Find a better way.
+
     use fltk::dialog;
     use std::path::Path;
     use crate::dir_mngmnt;
@@ -97,30 +99,7 @@ pub mod file_fltk {
         path
     }
 
-    /// Browse to a desired directory, return a string to use as a path.
-    /// Returned string includes both the path and the file name.
-    pub fn file_fullpath(usedir: &String) -> String {
 
-        // Convert the text of the starting directory into a PATH.
-        let strtpath = Path::new(usedir.as_str());
-        if !strtpath.exists() {
-            eprintln!("The path {} does not exist!", strtpath.display());
-        }
-
-        // Set the dialog browser to the default directory.
-        let mut dialog = dialog::NativeFileChooser::new(dialog
-                        ::NativeFileChooserType::BrowseFile);
-        let setrslt = dialog.set_directory(&strtpath);
-        if let Err(e) = setrslt {
-            eprintln!("Failed to set starting directory to:  {}", e);
-        }
-
-        dialog.show();
-
-        let path = dialog.filename().to_str().unwrap().to_string();
-
-        path
-    }
 
     /// Browse to a desired directory, return a string to use as a path for saving.
     /// Returned string includes both the path only, without the file name.
@@ -150,8 +129,6 @@ pub mod file_fltk {
     /// Browse to a desired directory, return the chosen file name only.
     /// 
     pub fn file_nameonly(usedir: &String) -> String {
-        // Convert the RefCell contents to a String.
-        //let rc_contents: String = usedir.borrow().clone();
 
         // Convert the text of the starting directory into a PATH.
         let strtpath = Path::new(usedir.as_str());
@@ -180,6 +157,31 @@ pub mod file_fltk {
 
 
 
+    /// Browse to a desired directory, return a string to use as a path.
+    /// Returned string includes both the path and the file name.
+    pub fn file_fullpath(usedir: &String) -> String {
+
+        // Convert the text of the starting directory into a PATH.
+        let strtpath = Path::new(usedir.as_str());
+        if !strtpath.exists() {
+            eprintln!("The path {} does not exist!", strtpath.display());
+        }
+
+        // Set the dialog browser to the default directory.
+        let mut dialog = dialog::NativeFileChooser::new(dialog
+        ::NativeFileChooserType::BrowseFile);
+        let setrslt = dialog.set_directory(&strtpath);
+        if let Err(e) = setrslt {
+            eprintln!("Failed to set starting directory to:  {}", e);
+        }
+
+        dialog.show();
+
+        let path = dialog.filename().to_str().unwrap().to_string();
+
+        path
+    }
+
     /// Browse to a desired directory, filter the files by the passed extension.
     /// The returned string includes both the path and the file name.
     ///
@@ -187,32 +189,15 @@ pub mod file_fltk {
     /// Note that a file must be highlighted before the dialog will close.
     pub fn file_fullpath_fltr(mut usedir: &String, extension: &str) -> String {
 
-        //todo: Passing usedir as an &String is clumsy.  Find a better way.
+        // Make sure the passed directory exists and `startpath` is ready.
 
-        // region Make sure the directory exists and `startpath` is ready.
+        let track = dir_check_valid(&mut usedir);
+        let startpath = Path::new(track.as_str());
 
-        let mut startpath = String::new();
-        if file_check_dir_valid(usedir.as_str()) {
-            startpath = usedir.clone();
-        } else {
-            eprintln!("The path {} does not exist!", usedir);
-            startpath = dir_mngmnt::file_get_home_directory();
-        }
-
-        // Convert strtpath into a PATH.
-        let startpath = Path::new(startpath.as_str());
-        // endregion
-
-        // region Set the dialog browser to the correct directory.
+        // Set the dialog browser to the correct directory.
         let mut dialog = dialog::NativeFileChooser::new(dialog
                                         ::NativeFileChooserType::BrowseFile);
-        let setrslt = dialog.set_directory(&startpath);
-        if let Err(e) = setrslt {
-            eprintln!("Failed to set starting directory to:  {}", e);
-            // And then what happens??????
-        }
-        // endregion
-
+        dialog.set_directory(&startpath).expect("Directory does not exist.");
         dialog.set_filter(extension);
         dialog.show();
 
@@ -286,36 +271,8 @@ pub mod file_fltk {
 
 /// # Functions dealing with directories.
 pub mod dir_mngmnt {
-    use std::env;
-
-    /// Checks if the given path corresponds to an existing directory.
-    ///
-    /// This function verifies whether the specified path is a directory on the filesystem.
-    /// It uses the `std::path::Path::is_dir` method, which checks the existence and type of the path.
-    ///
-    /// # Arguments
-    ///
-    /// * `road` - A string slice that holds the file path to be checked.
-    ///
-    /// # Returns
-    ///
-    /// * `true` if the provided path exists and is a directory.
-    /// * `false` otherwise.
-    ///
-    /// # Example
-    ///
-    ///     fn main() {
-    ///         let filename = "";
-    ///
-    ///         let truthornot = file_check_directory(&filename.to_string());
-    ///
-    ///         println!("\n {} \n", truthornot);
-    ///     }
-    ///
-    pub fn file_check_dir_valid(road: &str) -> bool {
-        let path = std::path::Path::new(road);
-        path.is_dir()
-    }
+    use std::{env, path::Path};
+    use crate::dir_mngmnt;
 
     /// Retrieves the default home directory path of the current user based on the operating system.
     ///
@@ -342,7 +299,7 @@ pub mod dir_mngmnt {
     ///
     /// # Note
     /// This function does not verify the existence of the retrieved path, it only returns the configured or default home directory.
-    pub fn file_get_home_directory() -> String {
+    pub fn dir_get_home() -> String {
         if cfg!(windows) {
             env::var("USERPROFILE").unwrap_or_else(|_| "C:\\".to_string())
         } else if cfg!(target_os = "macos") {
@@ -353,9 +310,21 @@ pub mod dir_mngmnt {
         }
     }
 
+    pub fn dir_check_valid(usedir: &String) -> String {
+
+        // Make sure the directory exists and `trail` is ready for use.
+        let trail = Path::new(usedir.as_str());
+        if trail.exists() {
+            usedir.clone()
+        } else {   // If the directory doesn't exist, default to the home directory.
+            eprintln!("The path {} does not exist!", usedir);
+            let track: String = dir_get_home();
+            track
+        }
+    }
 
 
-}
+} // end of dir_mngmnt module.
 
 /// # Terminal-based file i/o functions.
 pub mod file_mngmnt {
@@ -843,5 +812,5 @@ pub mod file_mngmnt {
 
 
 
-}
+} // end of file_mngmnt module
 
