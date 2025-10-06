@@ -12,7 +12,7 @@ use lib_file::file_fltk::*;
 fn main() {
     let usedir = "/home/jtreagan/nothing".to_string();
 
-    let beginningdir = file_fullpath_fltr(&usedir, "*.lst");
+    let beginningdir = file_fullpath(&usedir);
 
     println!("\n {} \n", beginningdir);
 }

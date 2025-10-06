@@ -25,7 +25,6 @@ pub mod file_fltk {
 
     use fltk::dialog;
     use std::path::Path;
-    use crate::dir_mngmnt;
     use crate::dir_mngmnt::*;
 
     /// Browse to a desired directory, return a string to use as a path for saving.
@@ -159,26 +158,20 @@ pub mod file_fltk {
 
     /// Browse to a desired directory, return a string to use as a path.
     /// Returned string includes both the path and the file name.
-    pub fn file_fullpath(usedir: &String) -> String {
+    pub fn (mut usedir: &String) -> String {
 
-        // Convert the text of the starting directory into a PATH.
-        let strtpath = Path::new(usedir.as_str());
-        if !strtpath.exists() {
-            eprintln!("The path {} does not exist!", strtpath.display());
-        }
+        // Make sure the passed directory exists and `startpath` is ready.
 
-        // Set the dialog browser to the default directory.
+        let track = dir_check_valid(&mut usedir);
+        let startpath = Path::new(track.as_str());
+
+        // Set the dialog browser to the correct directory.
         let mut dialog = dialog::NativeFileChooser::new(dialog
         ::NativeFileChooserType::BrowseFile);
-        let setrslt = dialog.set_directory(&strtpath);
-        if let Err(e) = setrslt {
-            eprintln!("Failed to set starting directory to:  {}", e);
-        }
-
+        dialog.set_directory(&startpath).expect("Directory does not exist.");
         dialog.show();
 
         let path = dialog.filename().to_str().unwrap().to_string();
-
         path
     }
 
@@ -272,7 +265,6 @@ pub mod file_fltk {
 /// # Functions dealing with directories.
 pub mod dir_mngmnt {
     use std::{env, path::Path};
-    use crate::dir_mngmnt;
 
     /// Retrieves the default home directory path of the current user based on the operating system.
     ///
