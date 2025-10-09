@@ -12,9 +12,9 @@ use lib_file::file_fltk::*;
 fn main() {
     let usedir = "/home/jtreagan/programming/sssdflkjfslkjfd".to_string();
 
-    let beginningdir = file_nameonly_fltr(&usedir, "*.lst");
+    let pickdirfile = file_pathonly(&usedir, "THIS IS A PROMPT");
 
-    println!("\n {} \n", beginningdir);
+    println!("\n {} \n", pickdirfile);
 }
 
 

@@ -23,20 +23,19 @@ pub mod file_fltk {
 
     //todo: Passing usedir as an &String is clumsy.  Find a better way.
 
+    //todo:  You are adding a prompt to the functions in this module.
+
     use fltk::dialog;
     use std::path::Path;
     use crate::dir_mngmnt::*;
 
     /// Browse to a desired directory, return a string to use as a path for saving.
     ///
-    pub fn file_browse_save(usedir: &String) -> String {
+    pub fn file_browse_save(mut usedir: &String) -> String {
 
-        // region Convert the text of the starting directory into a PATH & check exists.
-        let startpath = Path::new(usedir.as_str());
-        if !startpath.exists() {
-            eprintln!("The path {} does not exist!", startpath.display());
-        }
-        // endregion
+        // Make sure the passed directory exists and `startpath` is ready.
+        let track = dir_check_valid(&mut usedir);  // Defaults to home directory on err.
+        let startpath = Path::new(track.as_str());
 
         // Set the dialog browser to the default directory.
         let mut dialog = dialog::NativeFileChooser
@@ -100,7 +99,7 @@ pub mod file_fltk {
 
     /// Browse to a desired directory, return a string to use as a path for saving.
     /// Returned string includes both the path only, without the file name.
-    pub fn file_pathonly(mut usedir: &String) -> String {
+    pub fn file_pathonly(mut usedir: &String, prompt: &str) -> String {
 
         // Make sure the passed directory exists and `startpath` is ready.
         let track = dir_check_valid(&mut usedir);
@@ -111,6 +110,7 @@ pub mod file_fltk {
                                             ::NativeFileChooserType
                                             ::BrowseDir);
         dialog.set_directory(&startpath).expect("Cannot set directory.");
+        dialog.set_title(prompt);
 
         dialog.show();
 
@@ -189,35 +189,6 @@ pub mod file_fltk {
         path
     }
 
-    /*
-    /// Browse to a desired directory, filter the files by the passed extension.
-    /// The returned string includes both the path only.
-    pub fn file_pathonly_fltr(mut usedir: &String, extension: &str) -> String {
-        // Note that the `extension` value must have format  `*.xxxxx`.
-
-        // Make sure the passed directory exists and `startpath` is ready.
-        let track = dir_check_valid(&mut usedir);
-        let startpath = Path::new(track.as_str());
-
-        // Start dialog browser and set to the correct directory.
-        let mut dialog = dialog::NativeFileChooser::new(dialog
-                                                ::NativeFileChooserType
-                                                ::BrowseDir);
-        dialog.set_directory(&startpath).expect("Directory does not exist.");
-        //dialog.set_filter(extension);
-
-        dialog.show();
-
-        //let path = dialog.filename();
-        //let pathonly = path.to_str().unwrap().to_string();
-        //pathonly
-
-        let path = dialog.filename().to_str().unwrap().to_string();
-        path
-    }
-
-    */  // The concepts of "pathonly" and "filter" are incompatible.  Delete this.
-
     /// Browse to a desired directory, filter the files by the passed extension.
     /// The returned string includes only the file name.
     pub fn file_nameonly_fltr(mut usedir: &String, extension: &str) -> String {
@@ -233,6 +204,7 @@ pub mod file_fltk {
                                                     ::NativeFileChooserType
                                                     ::BrowseFile);
         dialog.set_directory(&startpath).expect("Directory does not exist.");
+        dialog.set_filter(extension);
 
         dialog.show();
 
