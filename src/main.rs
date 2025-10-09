@@ -10,9 +10,9 @@ use lib_file::file_fltk::*;
 */
 
 fn main() {
-    let usedir = "/home/jtreagan/nothing".to_string();
+    let usedir = "/home/jtreagan/programming/sssdflkjfslkjfd".to_string();
 
-    let beginningdir = file_fullpath(&usedir);
+    let beginningdir = file_nameonly_fltr(&usedir, "*.lst");
 
     println!("\n {} \n", beginningdir);
 }

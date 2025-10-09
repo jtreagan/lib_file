@@ -32,9 +32,9 @@ pub mod file_fltk {
     pub fn file_browse_save(usedir: &String) -> String {
 
         // region Convert the text of the starting directory into a PATH & check exists.
-        let strtpath = Path::new(usedir.as_str());
-        if !strtpath.exists() {
-            eprintln!("The path {} does not exist!", strtpath.display());
+        let startpath = Path::new(usedir.as_str());
+        if !startpath.exists() {
+            eprintln!("The path {} does not exist!", startpath.display());
         }
         // endregion
 
@@ -45,7 +45,7 @@ pub mod file_fltk {
 
         dialog.set_preset_file(usedir); // Set the suggested file name
 
-        let setrslt = dialog.set_directory(&strtpath);
+        let setrslt = dialog.set_directory(&startpath);
         if let Err(e) = setrslt {
             eprintln!("Failed to set starting directory to:  {}", e);
         }
@@ -98,50 +98,39 @@ pub mod file_fltk {
         path
     }
 
-
-
     /// Browse to a desired directory, return a string to use as a path for saving.
     /// Returned string includes both the path only, without the file name.
-    pub fn file_pathonly(usedir: &String) -> String {
+    pub fn file_pathonly(mut usedir: &String) -> String {
 
-        // Convert the text of the starting directory into a PATH.
-        let strtpath = Path::new(usedir.as_str());
-        if !strtpath.exists() {
-            eprintln!("The path {} does not exist!", strtpath.display());
-        }
+        // Make sure the passed directory exists and `startpath` is ready.
+        let track = dir_check_valid(&mut usedir);
+        let startpath = Path::new(track.as_str());
 
         // Set the dialog browser to the default directory.
         let mut dialog = dialog::NativeFileChooser::new(dialog
-                        ::NativeFileChooserType::BrowseDir);
-        let setrslt = dialog.set_directory(&strtpath);
-        if let Err(e) = setrslt {
-            eprintln!("Failed to set starting directory to:  {}", e);
-        }
+                                            ::NativeFileChooserType
+                                            ::BrowseDir);
+        dialog.set_directory(&startpath).expect("Cannot set directory.");
 
         dialog.show();
 
         let path = dialog.filename();
-        let pathonly = path.parent().unwrap().to_str().unwrap().to_string();
+        let pathonly = path.to_str().unwrap().to_string();
         pathonly
     }
 
     /// Browse to a desired directory, return the chosen file name only.
     /// 
-    pub fn file_nameonly(usedir: &String) -> String {
+    pub fn file_nameonly(mut usedir: &String) -> String {
 
-        // Convert the text of the starting directory into a PATH.
-        let strtpath = Path::new(usedir.as_str());
-        if !strtpath.exists() {
-            eprintln!("The path {} does not exist!", strtpath.display());
-        }
+        // Make sure the passed directory exists and `startpath` is ready.
+        let track = dir_check_valid(&mut usedir);
+        let startpath = Path::new(track.as_str());
 
         // Set the dialog browser to the default directory.
         let mut dialog = dialog::NativeFileChooser::new(dialog
                         ::NativeFileChooserType::BrowseFile);
-        let setrslt = dialog.set_directory(&strtpath);
-        if let Err(e) = setrslt {
-            eprintln!("Failed to set starting directory to:  {}", e);
-        }
+        dialog.set_directory(&startpath).expect("Directory does not exist.");
 
         dialog.show();
 
@@ -154,11 +143,9 @@ pub mod file_fltk {
         filename_string
     }
 
-
-
     /// Browse to a desired directory, return a string to use as a path.
     /// Returned string includes both the path and the file name.
-    pub fn (mut usedir: &String) -> String {
+    pub fn file_fullpath(mut usedir: &String) -> String {
 
         // Make sure the passed directory exists and `startpath` is ready.
 
@@ -175,6 +162,8 @@ pub mod file_fltk {
         path
     }
 
+    
+    
     /// Browse to a desired directory, filter the files by the passed extension.
     /// The returned string includes both the path and the file name.
     ///
@@ -187,66 +176,63 @@ pub mod file_fltk {
         let track = dir_check_valid(&mut usedir);
         let startpath = Path::new(track.as_str());
 
-        // Set the dialog browser to the correct directory.
+        // Start dialog browser and set to the correct directory.
         let mut dialog = dialog::NativeFileChooser::new(dialog
-                                        ::NativeFileChooserType::BrowseFile);
+                                        ::NativeFileChooserType
+                                        ::BrowseFile);
         dialog.set_directory(&startpath).expect("Directory does not exist.");
         dialog.set_filter(extension);
+
         dialog.show();
 
         let path = dialog.filename().to_str().unwrap().to_string();
         path
     }
 
-
-
+    /*
     /// Browse to a desired directory, filter the files by the passed extension.
     /// The returned string includes both the path only.
-    pub fn file_pathonly_fltr(usedir: &String, extension: &str) -> String {
+    pub fn file_pathonly_fltr(mut usedir: &String, extension: &str) -> String {
         // Note that the `extension` value must have format  `*.xxxxx`.
 
-        // Convert the text of the starting directory into a PATH.
-        let strtpath = Path::new(usedir.as_str());
-        if !strtpath.exists() {
-            eprintln!("The path {} does not exist!", strtpath.display());
-        }
+        // Make sure the passed directory exists and `startpath` is ready.
+        let track = dir_check_valid(&mut usedir);
+        let startpath = Path::new(track.as_str());
 
-        // Set the dialog browser to the default directory.
-        let mut dialog = dialog::NativeFileChooser::new(dialog::NativeFileChooserType::BrowseDir);
-        dialog.set_filter(extension);
-        let setrslt = dialog.set_directory(&strtpath);
-        if let Err(e) = setrslt {
-            eprintln!("Failed to set starting directory to:  {}", e);
-        }
+        // Start dialog browser and set to the correct directory.
+        let mut dialog = dialog::NativeFileChooser::new(dialog
+                                                ::NativeFileChooserType
+                                                ::BrowseDir);
+        dialog.set_directory(&startpath).expect("Directory does not exist.");
+        //dialog.set_filter(extension);
 
         dialog.show();
 
-        let path = dialog.filename();
-        let pathonly = path.parent().unwrap().to_str().unwrap().to_string();
-        pathonly
+        //let path = dialog.filename();
+        //let pathonly = path.to_str().unwrap().to_string();
+        //pathonly
+
+        let path = dialog.filename().to_str().unwrap().to_string();
+        path
     }
+
+    */  // The concepts of "pathonly" and "filter" are incompatible.  Delete this.
 
     /// Browse to a desired directory, filter the files by the passed extension.
     /// The returned string includes only the file name.
-    pub fn file_nameonly_fltr(usedir: &String, extension: &str) -> String {
+    pub fn file_nameonly_fltr(mut usedir: &String, extension: &str) -> String {
         // Note that the `extension` value must have format  `*.xxxxx`.
 
-        // Convert the RefCell contents to a String.
-        //let rc_contents: String = usedir.borrow().clone();
+        // Make sure the passed directory exists and `startpath` is ready.
+        let track = dir_check_valid(&mut usedir);
+        let startpath = Path::new(track.as_str());
 
-        // Convert the text of the starting directory into a PATH.
-        let strtpath = Path::new(usedir.as_str());
-        if !strtpath.exists() {
-            eprintln!("The path {} does not exist!", strtpath.display());
-        }
 
-        // Set the dialog browser to the default directory.
-        let mut dialog = dialog::NativeFileChooser::new(dialog::NativeFileChooserType::BrowseFile);
-        dialog.set_filter(extension);
-        let setrslt = dialog.set_directory(&strtpath);
-        if let Err(e) = setrslt {
-            eprintln!("Failed to set starting directory to:  {}", e);
-        }
+        // Set the dialog browser to the correct directory.
+        let mut dialog = dialog::NativeFileChooser::new(dialog
+                                                    ::NativeFileChooserType
+                                                    ::BrowseFile);
+        dialog.set_directory(&startpath).expect("Directory does not exist.");
 
         dialog.show();
 
@@ -259,8 +245,7 @@ pub mod file_fltk {
         filename_string
     }
 
-
-}
+}  // End of file_fltk module.
 
 /// # Functions dealing with directories.
 pub mod dir_mngmnt {
@@ -316,7 +301,7 @@ pub mod dir_mngmnt {
     }
 
 
-} // end of dir_mngmnt module.
+} // End of dir_mngmnt module.
 
 /// # Terminal-based file i/o functions.
 pub mod file_mngmnt {
@@ -804,5 +789,5 @@ pub mod file_mngmnt {
 
 
 
-} // end of file_mngmnt module
+} // End of file_mngmnt module
 
