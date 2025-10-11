@@ -31,27 +31,40 @@ pub mod file_fltk {
 
     /// Browse to a desired directory, return a string to use as a path for saving.
     ///
-    pub fn file_browse_save(mut usedir: &String) -> String {
-
+    pub fn file_browse_save(mut sggstdpath: &str, sggstdname: &str, sggstdextnsn: &str, wintitle: &str) -> String {
+        // region Note:
+        //          The passed string `usepath` should be a suggested directory for saving a
+        //          file using the suggested `usename` for a file name.  Note that both
+        //          variables are "suggestions" allowing for the user to change either.
+        // endregion
+        
         // Make sure the passed directory exists and `startpath` is ready.
-        let track = dir_check_valid(&mut usedir);  // Defaults to home directory on err.
+        let track = dir_check_valid(&mut sggstdpath.to_string());  // Defaults to home directory on err.
+
+        // Check that `usepath` is a pure path and not a path with a file name.
+        // If it is a path with a file name, remove the file name and use it instead
+        //      of `usename` for the suggested file name.
+
         let startpath = Path::new(track.as_str());
 
         // Set the dialog browser to the default directory.
-        let mut dialog = dialog::NativeFileChooser
+        let mut fchooser = dialog::NativeFileChooser
                                 ::new(dialog::NativeFileChooserType
                                 ::BrowseSaveFile);
 
-        dialog.set_preset_file(usedir); // Set the suggested file name
+        fchooser.set_directory(&startpath);
 
-        let setrslt = dialog.set_directory(&startpath);
-        if let Err(e) = setrslt {
-            eprintln!("Failed to set starting directory to:  {}", e);
-        }
+        //todo: Need to check the fname for extension.
 
-        dialog.show();
+        fchooser.set_preset_file(usename);
 
-        let path = dialog.filename().to_str().unwrap().to_string();
+
+        fchooser.set_title("THIS IS A TITLE");
+
+
+        fchooser.show();
+
+        let path = fchooser.filename().to_str().unwrap().to_string();
         path
     }
 
@@ -102,7 +115,7 @@ pub mod file_fltk {
     pub fn file_pathonly(mut usedir: &String, prompt: &str) -> String {
 
         // Make sure the passed directory exists and `startpath` is ready.
-        let track = dir_check_valid(&mut usedir);
+        let track = dir_check_valid(&mut usedir);  // Defaults to home directory on err.
         let startpath = Path::new(track.as_str());
 
         // Set the dialog browser to the default directory.
@@ -124,7 +137,7 @@ pub mod file_fltk {
     pub fn file_nameonly(mut usedir: &String) -> String {
 
         // Make sure the passed directory exists and `startpath` is ready.
-        let track = dir_check_valid(&mut usedir);
+        let track = dir_check_valid(&mut usedir);  // Defaults to home directory on err.
         let startpath = Path::new(track.as_str());
 
         // Set the dialog browser to the default directory.
@@ -148,8 +161,7 @@ pub mod file_fltk {
     pub fn file_fullpath(mut usedir: &String) -> String {
 
         // Make sure the passed directory exists and `startpath` is ready.
-
-        let track = dir_check_valid(&mut usedir);
+        let track = dir_check_valid(&mut usedir);  // Defaults to home directory on err.
         let startpath = Path::new(track.as_str());
 
         // Set the dialog browser to the correct directory.
@@ -172,8 +184,7 @@ pub mod file_fltk {
     pub fn file_fullpath_fltr(mut usedir: &String, extension: &str) -> String {
 
         // Make sure the passed directory exists and `startpath` is ready.
-
-        let track = dir_check_valid(&mut usedir);
+        let track = dir_check_valid(&mut usedir);  // Defaults to home directory on err.
         let startpath = Path::new(track.as_str());
 
         // Start dialog browser and set to the correct directory.
@@ -195,7 +206,7 @@ pub mod file_fltk {
         // Note that the `extension` value must have format  `*.xxxxx`.
 
         // Make sure the passed directory exists and `startpath` is ready.
-        let track = dir_check_valid(&mut usedir);
+        let track = dir_check_valid(&mut usedir);  // Defaults to home directory on err.
         let startpath = Path::new(track.as_str());
 
 
@@ -262,7 +273,7 @@ pub mod dir_mngmnt {
     pub fn dir_check_valid(usedir: &String) -> String {
 
         // Make sure the directory exists and `trail` is ready for use.
-        let trail = Path::new(usedir.as_str());
+        let trail = Path::new(usedir);
         if trail.exists() {
             usedir.clone()
         } else {   // If the directory doesn't exist, default to the home directory.
@@ -292,6 +303,57 @@ pub mod file_mngmnt {
     use std::{fmt::Debug, fs, fs::File, io, path::Path, str::FromStr};
     use std::cell::RefCell;
     use std::rc::Rc;
+
+    /// Checks the file extension of a given filename.
+    ///
+    /// This function takes a string slice representing a filename and determines if it has a valid
+    /// (non-empty) file extension. It splits the string from the rightmost `.` character
+    /// and checks both the base name and the extension to ensure neither is empty.
+    ///
+    /// # Arguments
+    ///
+    /// * `filename` - A string slice representing the filename to be checked.
+    ///
+    /// # Returns
+    ///
+    /// * `(bool, &str)` - A tuple where:
+    ///   - The first element is a boolean indicating whether a valid extension was found (`true` if valid).
+    ///   - The second element is the file extension as a string slice, or an empty string if no valid extension exists.
+    ///
+    /// # Examples
+    ///
+    ///     fn main() {
+    ///         let test_cases = vec![
+    ///          "file.txt",
+    ///         "document.pdf",
+    ///         "archive.tar.gz",
+    ///         "noextension",
+    ///         ".hidden",
+    ///         "file.",
+    ///         "",
+    ///         "path/to/file.rs",
+    ///     ];
+    ///
+    ///     for filename in test_cases {
+    ///         let (has_ext, ext) = check_extension(filename);
+    ///         println!("{:20} -> has_ext: {}, ext: '{}'", filename, has_ext, ext);
+    ///         }
+    ///     }
+    ///
+    pub fn file_check_extension(filename: &str) -> (bool, &str) {
+        match filename.rsplit_once('.') {
+            Some((base, ext)) if !base.is_empty() && !ext.is_empty() => {
+                (true, ext)
+            }
+            _ => (false, "")
+        }
+    }
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// More recently written functions are above.  Older functions that may need modification are below.
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
     /// Read a file to a String and print that String to the terminal.
     ///
