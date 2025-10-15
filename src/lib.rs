@@ -31,40 +31,49 @@ pub mod file_fltk {
 
     /// Browse to a desired directory, return a string to use as a path for saving.
     ///
-    pub fn file_browse_save(mut sggstdpath: &str, sggstdname: &str, sggstdextnsn: &str, wintitle: &str) -> String {
+    pub fn file_browse_tosave(sggstdpath: &str, sggstdname: &str, sggstdextnsn: &str, wintitle: &str) -> String {
         // region Note:
         //          The passed string `usepath` should be a suggested directory for saving a
         //          file using the suggested `usename` for a file name.  Note that both
         //          variables are "suggestions" allowing for the user to change either.
         // endregion
         
-        // Make sure the passed directory exists and `startpath` is ready.
+        // region Check that the passed directory exists and `startpath` is ready.
         let track = dir_check_valid(&mut sggstdpath.to_string());  // Defaults to home directory on err.
-
-        // Check that `usepath` is a pure path and not a path with a file name.
-        // If it is a path with a file name, remove the file name and use it instead
-        //      of `usename` for the suggested file name.
-
         let startpath = Path::new(track.as_str());
+        // endregion
 
-        // Set the dialog browser to the default directory.
+        // region Call a dialog browser and set it to the passed directory.
         let mut fchooser = dialog::NativeFileChooser
                                 ::new(dialog::NativeFileChooserType
                                 ::BrowseSaveFile);
+        fchooser.set_directory(&startpath).expect("Cannot set directory.");
+        // endregion
 
-        fchooser.set_directory(&startpath);
+        // region  Add the passed extension to the suggested file name.
+        let ext_to_append = sggstdextnsn.strip_prefix("*.").unwrap_or(sggstdextnsn);
+        let usename = format!("{}.{}", sggstdname, ext_to_append);
+        fchooser.set_preset_file(usename.as_str());
+        // endregion
 
-        //todo: Need to check the fname for extension.
+        // region Create the filter string & set the filter.
+        let useext;
+        if !sggstdextnsn.starts_with("*.") {
+            useext = format!("*.{}", sggstdextnsn);
+        } else {
+            useext = sggstdextnsn.to_string();
+        }
+        let combined_filter = format!("List Files\t{}\nAll Files\t*.*", useext);
+        fchooser.set_filter(&combined_filter);
+        // endregion
 
-        fchooser.set_preset_file(usename);
-
-
-        fchooser.set_title("THIS IS A TITLE");
-
+        // Set the title of the dialog browser.
+        fchooser.set_title(wintitle);
 
         fchooser.show();
 
         let path = fchooser.filename().to_str().unwrap().to_string();
+
         path
     }
 
@@ -232,7 +241,8 @@ pub mod file_fltk {
 
 /// # Functions dealing with directories.
 pub mod dir_mngmnt {
-    use std::{env, path::Path};
+    use std::{env, fs, io, path::Path};
+    use lib_utils::input_utilities::input_string_prompt;
 
     /// Retrieves the default home directory path of the current user based on the operating system.
     ///
@@ -270,6 +280,41 @@ pub mod dir_mngmnt {
         }
     }
 
+    /// Validates the given directory path and ensures it is ready for use.
+    /// If the provided directory exists, its path is returned. Otherwise,
+    /// the function falls back to the user's home directory.
+    ///
+    /// # Arguments
+    ///
+    /// * `usedir` - A reference to a `String` containing the directory path to be checked.
+    ///
+    /// # Returns
+    ///
+    /// A `String` containing the valid directory path. If the provided path does not
+    /// exist, it returns the user's home directory path.
+    ///
+    /// # Behavior
+    ///
+    /// - Verifies whether the directory specified by `usedir` exists.
+    /// - If the directory exists, the function returns the original directory path.
+    /// - If the directory does not exist:
+    ///   - An error message is printed to `stderr` indicating the invalid path.
+    ///   - The function defaults to the user's home directory, as obtained
+    ///     by the `dir_get_home` function, and returns that instead.
+    ///
+    /// # Example
+    ///     fn main() {
+    ///         let path = String::from("/nonexistent/path");
+    ///         let valid_path = dir_check_valid(&path);
+    ///         println!("Validated path: {}", valid_path); // Prints the home directory path
+    ///     }                                               if `/nonexistent/path` doesn't exist.
+    ///
+    /// # Notes
+    ///
+    /// The function assumes the existence of a helper function `dir_get_home`,
+    /// which retrieves the user's home directory as a `String`. Ensure this
+    /// dependency is properly implemented.
+    ///
     pub fn dir_check_valid(usedir: &String) -> String {
 
         // Make sure the directory exists and `trail` is ready for use.
@@ -282,6 +327,111 @@ pub mod dir_mngmnt {
             track
         }
     }
+
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // More recently written functions are above.
+    // Older, terminal-based functions that may need modification are below.
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+    /// Check the validity of a directory path and correct it if necessary.
+    ///
+    /// Example:
+    ///
+    ///     fn main() {
+    ///         let mut dirpath: String = "kjhkjhjkh/home/camascounty/programming/rust/mine/file_lib".to_string();
+    ///
+    ///         let dirchecked = dir_checkexist_fix(&dirpath);
+    ///         if dirchecked.0 == false {
+    ///             println!("\n The path \n      {} \n was not usable and was not corrected. \n", dirpath);
+    ///         } else {
+    ///            println!("\n The correct path is:  {}", dirchecked.1);
+    ///            println!("\n All is okay!!  :>) \n");
+    ///         }
+    ///     }
+    pub fn dir_checkexist_fix(dirpath: &String) -> (bool, String) {
+        let mut fullpath = Path::new(dirpath.as_str());
+        let mut newpath: String = dirpath.to_string().clone();
+
+        loop {
+            let exists = fullpath.try_exists()
+                .expect("Error when checking the existence of the directory");
+
+            if exists {
+                return (true, newpath);
+            } else {
+                println!("\n The directory \n      {} \n does not exist and may not be used.", newpath);
+                newpath = input_string_prompt(
+                    "\n Please enter a corrected path for the directory in which you wish to save this file.  \n\
+                         (Do not include the file name):   ");  // Eventually add ability to edit the existing string.
+                if newpath == "" {
+                    return (false, "".to_string());
+                } else {
+                    fullpath = Path::new(newpath.as_str());
+                }
+            }
+        }
+    }
+
+    /// Check to see if a directory is empty.
+    ///
+    /// Example:
+    ///
+    ///      fn main() {
+    ///         let directory = "/home/camascounty/programming/rust/mine/empty";
+    ///         match dir_check_empty(directory) {
+    ///         Ok(is_empty) => {
+    ///             if is_empty {
+    ///                 println!("\n The path  {}  is empty.", directory);
+    ///             } else {
+    ///                 println!("\n The path  {}  is not empty.", directory);
+    ///             }
+    ///         }
+    ///         Err(err) => {
+    ///             println!("Error when checking if directory is empty: {}", err);
+    ///         }
+    ///     }
+    ///     }
+    ///
+    pub fn dir_check_empty(dirpath: &str) -> io::Result<bool> {
+        let mut entries = fs::read_dir(dirpath)?;
+        let first_entry = entries.next();
+        Ok(first_entry.is_none())
+    }
+
+    /// Check a user-entered path for validity.
+    ///
+    pub fn dir_get_path() -> (bool, String) {
+        let dirpath = input_string_prompt(
+            "\n Please enter a path for the directory in which you wish to save this file.  \n\
+              (Do not include the file name):   ");
+
+        let dirok = dir_checkexist_fix(&dirpath);
+        if dirok.0 == false {
+            println!("\n The path \n   {} \n was not usable and was not corrected. \n", dirpath);
+            panic!("Invalid and uncorrected path entered.");
+            // todo: Maybe eventually return an error that the main program can use to
+            // redirect the user's activity.
+        }
+        (true, dirpath)
+    }
+
+    /// Same as `dir_get_path` except that one can pass whatever prompt
+    /// you like to the function.
+    pub fn dir_get_path_prompt(prompt: &str) -> (bool, String) {
+        let dirpath = input_string_prompt( prompt);
+        let dirok = dir_checkexist_fix(&dirpath);
+        if dirok.0 == false {
+            println!("\n The path \n   {} \n was not usable and was not corrected. \n", dirpath);
+            panic!("Invalid and uncorrected path entered.");
+            // todo: Maybe eventually return an error that the main program can use to
+            // redirect user's activity.
+        }
+        (true, dirpath)
+    }
+
+
 
 
 } // End of dir_mngmnt module.
@@ -303,6 +453,7 @@ pub mod file_mngmnt {
     use std::{fmt::Debug, fs, fs::File, io, path::Path, str::FromStr};
     use std::cell::RefCell;
     use std::rc::Rc;
+    use crate::dir_mngmnt::{dir_check_empty, dir_checkexist_fix};
 
     /// Checks the file extension of a given filename.
     ///
@@ -725,101 +876,7 @@ pub mod file_mngmnt {
         usepath
     }
 
-    /// Check the validity of a directory path and correct it if necessary.
-    ///
-    /// Example:
-    ///
-    ///     fn main() {
-    ///         let mut dirpath: String = "kjhkjhjkh/home/camascounty/programming/rust/mine/file_lib".to_string();
-    ///
-    ///         let dirchecked = dir_checkexist_fix(&dirpath);
-    ///         if dirchecked.0 == false {
-    ///             println!("\n The path \n      {} \n was not usable and was not corrected. \n", dirpath);
-    ///         } else {
-    ///            println!("\n The correct path is:  {}", dirchecked.1);
-    ///            println!("\n All is okay!!  :>) \n");
-    ///         }
-    ///     }
-    pub fn dir_checkexist_fix(dirpath: &String) -> (bool, String) {
-        let mut fullpath = Path::new(dirpath.as_str());
-        let mut newpath: String = dirpath.to_string().clone();
 
-        loop {
-            let exists = fullpath.try_exists()
-                .expect("Error when checking the existence of the directory");
-
-            if exists {
-                return (true, newpath);
-            } else {
-                println!("\n The directory \n      {} \n does not exist and may not be used.", newpath);
-                newpath = input_string_prompt(
-                    "\n Please enter a corrected path for the directory in which you wish to save this file.  \n\
-                         (Do not include the file name):   ");  // Eventually add ability to edit the existing string.
-                if newpath == "" {
-                    return (false, "".to_string());
-                } else {
-                    fullpath = Path::new(newpath.as_str());
-                }
-            }
-        }
-    }
-
-    /// Check to see if a directory is empty.
-    ///
-    /// Example:
-    ///
-    ///      fn main() {
-    ///         let directory = "/home/camascounty/programming/rust/mine/empty";
-    ///         match dir_check_empty(directory) {
-    ///         Ok(is_empty) => {
-    ///             if is_empty {
-    ///                 println!("\n The path  {}  is empty.", directory);
-    ///             } else {
-    ///                 println!("\n The path  {}  is not empty.", directory);
-    ///             }
-    ///         }
-    ///         Err(err) => {
-    ///             println!("Error when checking if directory is empty: {}", err);
-    ///         }
-    ///     }
-    ///     }
-    ///
-    pub fn dir_check_empty(dirpath: &str) -> io::Result<bool> {
-        let mut entries = fs::read_dir(dirpath)?;
-        let first_entry = entries.next();
-        Ok(first_entry.is_none())
-    }
-
-    /// Check a user-entered path for validity.
-    ///
-    pub fn dir_get_path() -> (bool, String) {
-        let dirpath = input_string_prompt(
-            "\n Please enter a path for the directory in which you wish to save this file.  \n\
-              (Do not include the file name):   ");
-
-        let dirok = dir_checkexist_fix(&dirpath);
-        if dirok.0 == false {
-            println!("\n The path \n   {} \n was not usable and was not corrected. \n", dirpath);
-            panic!("Invalid and uncorrected path entered.");
-            // todo: Maybe eventually return an error that the main program can use to
-            // redirect the user's activity.
-        }
-        (true, dirpath)
-    }
-
-    /// Same as `dir_get_path` except that one can pass whatever prompt
-    /// you like to the function.
-    pub fn dir_get_path_prompt(prompt: &str) -> (bool, String) {
-        let dirpath = input_string_prompt( prompt);
-        let dirok = dir_checkexist_fix(&dirpath);
-        if dirok.0 == false {
-            println!("\n The path \n   {} \n was not usable and was not corrected. \n", dirpath);
-            panic!("Invalid and uncorrected path entered.");
-            // todo: Maybe eventually return an error that the main program can use to
-            // redirect user's activity.
-        }
-        (true, dirpath)
-    }
 
 
 

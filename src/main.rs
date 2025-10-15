@@ -1,5 +1,3 @@
-//#![allow(dead_code)]
-//#![allow(unused)]
 
 
 use lib_file::file_fltk::*;
@@ -10,9 +8,9 @@ use lib_file::file_fltk::*;
 */
 
 fn main() {
-    let usedir = "/home/jtreagan/programming/sssdflkjfslkjfd".to_string();
+    let usedir = "/home/jtreagan/programming/mine/qbnk_rb7/src/qbnk_data/lists";
 
-    let pickdirfile = file_pathonly(&usedir, "THIS IS A PROMPT");
+    let pickdirfile = file_browse_tosave(&usedir, "ggggggggg", "lst", "THIS IS A PROMPT");
 
     println!("\n {} \n", pickdirfile);
 }
