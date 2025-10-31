@@ -29,9 +29,55 @@ pub mod file_fltk {
     use std::path::Path;
     use crate::dir_mngmnt::*;
 
-    /// Browse to a desired directory, return a string to use as a path for saving.
+
+    /// Opens a native file save dialog for the user to select a location
+    /// and name for saving a file, with pre-suggested parameters and a file extension filter.
     ///
-    pub fn file_browse_tosave(sggstdpath: &str, sggstdname: &str, sggstdextnsn: &str, wintitle: &str) -> String {
+    /// # Parameters
+    /// - `sggstdpath`: A reference to a string that specifies the suggested directory to open in the file dialog.
+    ///                 If the directory does not exist, it defaults to the user's home directory.
+    /// - `sggstdname`: A reference to a string that specifies the suggested default file name.
+    /// - `sggstdextnsn`: A reference to a string that defines the file extension or filter type for the save dialog.
+    ///                   This may include the `*.` prefix (e.g., `*.txt`) but is not required.
+    /// - `wintitle`: A reference to a string that specifies the title of the file save dialog window.
+    ///
+    /// # Returns
+    /// Returns a `String` that represents the full path of the file chosen or saved by the user.
+    ///
+    /// # Behavior
+    /// - Ensures the suggested directory (`sggstdpath`) exists before launching the file dialog.
+    /// - Uses the suggested directory and file name as defaults in the save dialog but allows the user to modify them.
+    /// - Automatically appends the provided file extension (`sggstdextnsn`) to the suggested file name if it is not already included.
+    /// - Sets a filter in the file dialog to display only files matching the provided extension and also adds an
+    ///   "All Files" filter option for displaying all files.
+    /// - Displays the dialog with the title provided in `wintitle`.  That title can also serve as a
+    ///     prompt to help guide the user.
+    ///
+    /// # Notes
+    /// - The `sggstdpath` and `sggstdname` parameters are suggestions only; the user can change both during the browsing process.
+    /// - If an invalid directory is specified in `sggstdpath`, it defaults to the user's home directory.
+    ///
+    /// # Example
+    /// ```rust
+    /// let save_path = file_browse_tosave(
+    ///     "/home/user/documents",
+    ///     "example_file",
+    ///     "txt",
+    ///     "Save Example File"
+    /// );
+    /// println!("File to save at: {}", save_path);
+    /// ```
+    ///
+    /// # Dependencies
+    /// - This function utilizes `dialog::NativeFileChooser` for handling the native file save dialog.
+    /// - The function requires utilities like `dir_check_valid` to validate the suggested directory.
+    pub fn file_browse_tosave(sggstdpath: &str, sggstdname: &str, sggstdextnsn: &str) -> String {
+        //todo: The native Linux file dialog browser does not allow the user to add
+        //      a title to the save-file dialog window.  That feature has been
+        //      removed from the function.
+        //      You may want to use FLTK's file dialog browser instead.
+        //      Is it worth it?  Experiment.
+
         // region Note:
         //          The passed string `usepath` should be a suggested directory for saving a
         //          file using the suggested `usename` for a file name.  Note that both
@@ -51,24 +97,36 @@ pub mod file_fltk {
         // endregion
 
         // region  Add the passed extension to the suggested file name.
-        let ext_to_append = sggstdextnsn.strip_prefix("*.").unwrap_or(sggstdextnsn);
-        let usename = format!("{}.{}", sggstdname, ext_to_append);
+        let usename;
+        if sggstdextnsn != "" {
+            let ext_to_append = sggstdextnsn.strip_prefix("*.").unwrap_or(sggstdextnsn);
+            usename = format!("{}.{}", sggstdname, ext_to_append);
+        }  else {
+            usename = sggstdname.to_string();
+        }
         fchooser.set_preset_file(usename.as_str());
         // endregion
 
         // region Create the filter string & set the filter.
-        let useext;
-        if !sggstdextnsn.starts_with("*.") {
-            useext = format!("*.{}", sggstdextnsn);
-        } else {
-            useext = sggstdextnsn.to_string();
+
+        // todo: Pass the extension suggestion in a vector that can include multiple extensions.
+        //      Include an extension title in that vector.  Would a hashmap be a better choice?
+
+        let combined_filter;
+        if sggstdextnsn == "" {
+            combined_filter = "All Files\t*.*".to_string();
+        }  else {
+            let useext;
+            if !sggstdextnsn.starts_with("*.") {
+                useext = format!("*.{}", sggstdextnsn);
+            } else {
+                useext = sggstdextnsn.to_string();
+            }
+            combined_filter = format!("Type   \t{}\nAll Files   \t*.*", useext);
         }
-        let combined_filter = format!("List Files\t{}\nAll Files\t*.*", useext);
+
         fchooser.set_filter(&combined_filter);
         // endregion
-
-        // Set the title of the dialog browser.
-        fchooser.set_title(wintitle);
 
         fchooser.show();
 
@@ -77,6 +135,7 @@ pub mod file_fltk {
         path
     }
 
+  /*
     /// Browse to a desired directory, filter the directory by the passed extension,
     /// return a string to use as a path for saving.
     ///
@@ -118,26 +177,35 @@ pub mod file_fltk {
         let path = dialog.filename().to_str().unwrap().to_string();
         path
     }
+*/  // to be deleted file_browse_save_fltr
 
     /// Browse to a desired directory, return a string to use as a path for saving.
     /// Returned string includes both the path only, without the file name.
-    pub fn file_pathonly(mut usedir: &String, prompt: &str) -> String {
+    pub fn file_pathonly(sggstdpath: &String, wintitle: &str) -> String {
 
-        // Make sure the passed directory exists and `startpath` is ready.
-        let track = dir_check_valid(&mut usedir);  // Defaults to home directory on err.
+        //todo: Include some of the modifications made to the file_browse_tosave() function.
+
+        // region Check that the passed directory exists and `startpath` is ready.
+        let track = dir_check_valid(&mut sggstdpath.to_string());  // Defaults to home directory on err.
         let startpath = Path::new(track.as_str());
+        // endregion
 
-        // Set the dialog browser to the default directory.
-        let mut dialog = dialog::NativeFileChooser::new(dialog
+        // region Call a dialog browser and set it to the passed directory.
+        let mut fchooser = dialog::NativeFileChooser::new(dialog
                                             ::NativeFileChooserType
                                             ::BrowseDir);
-        dialog.set_directory(&startpath).expect("Cannot set directory.");
-        dialog.set_title(prompt);
+        fchooser.set_directory(&startpath).expect("Cannot set directory.");
+        // endregion
 
-        dialog.show();
+        // Set the title of the dialog browser.
+        fchooser.set_title(wintitle);
 
-        let path = dialog.filename();
-        let pathonly = path.to_str().unwrap().to_string();
+        fchooser.show();
+
+        //let path = fchooser.filename();
+        //let pathonly = path.to_str().unwrap().to_string();
+
+        let pathonly = fchooser.filename().to_str().unwrap().to_string();
         pathonly
     }
 
