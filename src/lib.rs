@@ -20,10 +20,33 @@
 
 /// # Functions based on the fltk::dialog module.
 pub mod file_fltk {
-
+    // region todo's
     //todo: Passing usedir as an &String is clumsy.  Find a better way.
 
-    //todo:  You are adding a prompt to the functions in this module.
+    //todo:  When running this program with the first call to FLTK.rs's
+    //          file `dialog`, the dialog window opens on top of the primary
+    //          window just fine.  However, after that any subsequent dialog
+    //          windows open behind the primary window.  I need them to open
+    //          on top.  You need to fix this in every function.  Here's what the AI said:
+    //          ## Option 3: Use FLTK's Modal Windows (Best Long-term Solution)
+    //          The proper fix is to modify your `lib_file` crate's dialog functions.
+    //          If you can share or modify those functions, you should add parent window
+    //           support.   Here's an example of what the fix would look like:
+    //          ```rust
+    // use fltk::window::Window;
+    // pub fn file_fullpath_with_parent(path: &str, parent: Option<&Window>) -> String {
+    //     let mut dialog = fltk::dialog::FileDialog::new(fltk::dialog::FileDialogType::BrowseFile);
+    //     dialog.set_directory(path);
+    //     // Set parent if provided
+    //     if let Some(win) = parent {
+    //         dialog.set_modal(true);
+    //         // This ensures the dialog is associated with the parent window
+    //     }
+    //     dialog.show();
+    //     dialog.filename().to_string_lossy().to_string()
+    // }
+    //          ```
+    //endregion
 
     use fltk::dialog;
     use std::path::Path;
@@ -395,6 +418,83 @@ pub mod dir_mngmnt {
             track
         }
     }
+
+    /// Normalizes a given directory string to resolve its path based on the context.
+    ///
+    /// This function processes the input string and modifies it according to the following cases:
+    ///
+    /// ### Case 1: Input Path is a Valid Directory
+    /// - If the given string corresponds to an existing directory, the function returns the directory path
+    ///   as is.
+    ///
+    /// ### Case 2: Input Path is a Valid File
+    /// - If the input string points to an existing file, the function returns the parent directory of that file.
+    ///
+    /// ### Case 3: Input Path is Likely a Directory with an Inaccurate Ending
+    /// - If the input string might represent a directory but includes an inaccurate file name, the function
+    ///   attempts to resolve and return the parent directory.
+    ///
+    /// ### Case 4: Cannot Resolve the Input Path
+    /// - If none of the above conditions are met (e.g., the path is invalid), an error message will be printed
+    ///   to `stderr`, and it will return the user's home directory as a fallback.
+    ///
+    /// #### Parameters
+    /// - `dirstring`: A string slice holding the directory or file path to normalize.
+    ///
+    /// #### Returns
+    /// - A `String` containing the normalized path, based on the provided input's resolution.
+    ///
+    /// #### Panics
+    /// - The function uses `unwrap()` in scenarios where it is guaranteed that the operation is safe
+    ///   (e.g., when fetching the parent of a file path).
+    ///
+    /// #### Side Effects
+    /// - Prints an error message to `stderr` if the input cannot be resolved to a valid path or file.
+    ///
+    /// #### Example
+    ///     fn main() {
+    ///         let newstring = dir_normalize_path("/home/jtreagan/programming/mine/cards");
+    ///         println!("\n The normalized path is: {} \n", newstring);
+    ///     }
+    ///
+    /// This example would print the home directory path if the given path `/some/invalid/file.txt`
+    /// cannot be resolved to a legitimate file or directory path.
+    ///
+    /// #### Notes
+    /// - The function relies on another method `dir_get_home` to fetch the user's home directory when
+    ///   the input path is invalid.
+    pub fn dir_normalize_path(dirstring: &str) -> String {
+        let usepath = Path::new(dirstring);
+
+        // region Case 1: The path does not need modification.
+        if usepath.is_dir() {
+            return usepath.to_string_lossy().into_owned();
+        }
+        // endregion
+
+        // region Case 2: The path points to an existing file.
+        if usepath.is_file() {
+            let newpath = usepath.parent();
+            if newpath.is_some() {
+                return newpath.unwrap().to_string_lossy().into_owned();
+                // The unwrap() is safe because the path is a file.
+            }
+        }
+        // endregion
+
+        // region Case 3: The string could be a directory with an inaccurate file name on the end.
+        let newpath = usepath.parent().unwrap();
+        if newpath.is_dir() {
+            return newpath.to_string_lossy().into_owned();
+        }
+        // endregion
+
+        // region Case 4: The path cannot be resolved so default to the home directory.
+        eprintln!("\n Error!  The passed string,   '{}'   is not a path or file.", dirstring);
+        dir_get_home()
+        // endregion
+    }
+
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
