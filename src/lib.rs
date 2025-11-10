@@ -266,28 +266,60 @@ pub mod file_fltk {
         filename_string
     }
 
+    /// Generates a dialog to choose a file, starting from a specified directory,
+    /// and returns the full path of the selected file.
+    ///
+    /// # Arguments
+    /// - `sggstdpath`: A mutable reference to a string slice representing the starting directory path.
+    ///   If the path is invalid or does not exist, it defaults to the home directory.
+    /// - `wintitle`: A string slice that sets the window title of the file chooser dialog.
+    ///
+    /// # Returns
+    /// - A `String` containing the full path of the selected file.
+    ///
+    /// # Behavior
+    /// 1. Validates and normalizes the given directory path (`sggstdpath`) to ensure it exists.
+    ///    If validation fails, defaults the starting path to the home directory.
+    /// 2. Displays a file chooser dialog starting from the provided (or adjusted) directory
+    ///    and assigns the given `wintitle` as the window's title.
+    /// 3. Retrieves the full path of the selected file and returns it as a string.
+    ///
+    /// # Panics
+    /// - If there is a problem setting the directory for the file chooser dialog, the function will
+    ///   panic with the message `"Cannot set directory."`.
+    ///
+    /// # Example
+    ///     fn main() {
+    ///         let usedir = "/home/jtreagan/programming/mine/qbnk_rb7/src/qbnk_data/lists";
+    ///         let path = file_fullpath(usedir, "TITLE TITLE TITLE");
+    ///         println!("\n {} \n", path);
+    ///         }
+    ///
+    /// # Notes
+    /// - The function uses the `dialog` crate to create a native file chooser dialog.
+    /// - The provided `sggstdpath` is validated and normalized using `dir_normalize_path`.
+    /// - The resulting file path is converted to a `String` and returned.
+    pub fn file_fullpath(mut sggstdpath: &str, wintitle: &str) -> String {
 
-
-
-    // todo: Add title field to below functions.
-
-    /// Browse to a desired directory, return a string to use as a path.
-    /// Returned string includes both the path and the file name.
-    pub fn file_fullpath(mut usedir: &String) -> String {
-
-        // Make sure the passed directory exists and `startpath` is ready.
-        let track = dir_check_valid(&mut usedir);  // Defaults to home directory on err.
+        // region Check that the passed directory exists and `startpath` is ready.
+        let track = dir_normalize_path(&mut sggstdpath);  // Defaults to home directory on err.
         let startpath = Path::new(track.as_str());
+        // endregion
 
-        // Set the dialog browser to the correct directory.
-        let mut dialog = dialog::NativeFileChooser::new(dialog
-        ::NativeFileChooserType::BrowseFile);
-        dialog.set_directory(&startpath).expect("Directory does not exist.");
-        dialog.show();
+        // region Call a dialog browser, set it to the passed directory & set the title.
 
-        let path = dialog.filename().to_str().unwrap().to_string();
+        let mut fchooser = dialog::NativeFileChooser::new(dialog::NativeFileChooserType::BrowseFile);
+        fchooser.set_directory(&startpath).expect("Cannot set directory.");
+        fchooser.set_title(wintitle);
+        fchooser.show();
+
+        // endregion
+
+        // Extract the path from the file chooser.
+        let path = fchooser.filename().to_str().unwrap().to_string();
         path
     }
+
 
     // todo: If you add extension and file name fields to the above functions,
     //          you can likely eliminate the need for the following functions.
