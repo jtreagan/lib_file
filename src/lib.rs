@@ -168,7 +168,7 @@ pub mod file_fltk {
         let startpath = Path::new(track.as_str());
         // endregion
 
-        // region Call a dialog browser and set it to the passed directory & set the title.
+        // region Call a dialog browser, set it to the passed directory & set the title.
 
         let mut fchooser = dialog::NativeFileChooser::new(dialog::NativeFileChooserType::BrowseDir);
         fchooser.set_directory(&startpath).expect("Cannot set directory.");
@@ -178,16 +178,21 @@ pub mod file_fltk {
 
         fchooser.show();
 
-        //let path = fchooser.filename();
-        //let pathonly = path.to_str().unwrap().to_string();
-
         let pathonly = fchooser.filename().to_str().unwrap().to_string();
         pathonly
     }
 
+
+
     /// Browse to a desired directory, return the chosen file name only.
     /// 
-    pub fn file_nameonly(mut usedir: &String) -> String {
+    pub fn file_nameonly(mut sggstdpath: &str, wintitle: &str) -> String {
+
+        // region Check that the passed directory exists and `startpath` is ready.
+        let track = dir_normalize_path(&mut sggstdpath);  // Defaults to home directory on err.
+        let startpath = Path::new(track.as_str());
+        // endregion
+
 
         // Make sure the passed directory exists and `startpath` is ready.
         let track = dir_check_valid(&mut usedir);  // Defaults to home directory on err.
@@ -209,6 +214,11 @@ pub mod file_fltk {
         filename_string
     }
 
+
+
+
+    // todo: Add title field to below functions.
+
     /// Browse to a desired directory, return a string to use as a path.
     /// Returned string includes both the path and the file name.
     pub fn file_fullpath(mut usedir: &String) -> String {
@@ -227,7 +237,8 @@ pub mod file_fltk {
         path
     }
 
-    
+    // todo: If you add extension and file name fields to the above functions,
+    //          you can likely eliminate the need for the following functions.
     
     /// Browse to a desired directory, filter the files by the passed extension.
     /// The returned string includes both the path and the file name.
