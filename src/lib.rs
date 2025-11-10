@@ -46,6 +46,12 @@ pub mod file_fltk {
     //     dialog.filename().to_string_lossy().to_string()
     // }
     //          ```
+
+    //todo: The native Linux file dialog browser does not allow the user to add
+    //      a title to the save-file dialog window.  That feature has been
+    //      removed from the function.
+    //      You may want to use FLTK's file dialog browser instead.
+    //      Is it worth it?  Experiment.
     //endregion
 
     use fltk::dialog;
@@ -95,15 +101,10 @@ pub mod file_fltk {
     /// - This function utilizes `dialog::NativeFileChooser` for handling the native file save dialog.
     /// - The function requires utilities like `dir_check_valid` to validate the suggested directory.
     pub fn file_browse_tosave(sggstdpath: &str, sggstdname: &str, sggstdextnsn: &str) -> String {
-        //todo: The native Linux file dialog browser does not allow the user to add
-        //      a title to the save-file dialog window.  That feature has been
-        //      removed from the function.
-        //      You may want to use FLTK's file dialog browser instead.
-        //      Is it worth it?  Experiment.
 
         // region Note:
-        //          The passed string `usepath` should be a suggested directory for saving a
-        //          file using the suggested `usename` for a file name.  Note that both
+        //          The passed string `sggstdpath` should be a suggested directory for saving a
+        //          file using the suggested `sggstdname` for a file name.  Note that both
         //          variables are "suggestions" allowing for the user to change either.
         // endregion
         
@@ -158,70 +159,22 @@ pub mod file_fltk {
         path
     }
 
-  /*
-    /// Browse to a desired directory, filter the directory by the passed extension,
-    /// return a string to use as a path for saving.
-    ///
-    /// Examples:
-    ///
-    ///     let path = file_browse_save_fltr("Text Files   \t*.txt\nVariable Files   \t*.vrbl\nAll Files");
-    ///
-    /// or use something like this:
-    ///
-    ///     let path = file_browse_save_fltr("*.*");
-    ///
-    /// To show all files.
-    ///
-    pub fn file_browse_save_fltr(usedir: &String, extension: &str) -> String{
-        // Note that the `extension` value must have format  "*.xxxxx"
-
-        // region Convert the text of the starting directory into a PATH.
-        let strtpath = Path::new(usedir.as_str());
-        if !strtpath.exists() {
-            eprintln!("The path {} does not exist!", strtpath.display());
-        }
-        // endregion
-
-        // Set the dialog browser to the default directory.
-        let mut dialog = dialog::NativeFileChooser
-                                ::new(dialog::NativeFileChooserType
-                                ::BrowseSaveFile);
-
-        dialog.set_preset_file(usedir); // Set the suggested file name
-
-        dialog.set_filter(extension);
-        let setrslt = dialog.set_directory(&strtpath);
-        if let Err(e) = setrslt {
-            eprintln!("Failed to set starting directory to:  {}", e);
-        }
-
-        dialog.show();
-
-        let path = dialog.filename().to_str().unwrap().to_string();
-        path
-    }
-*/  // to be deleted file_browse_save_fltr
-
     /// Browse to a desired directory, return a string to use as a path for saving.
     /// Returned string includes both the path only, without the file name.
-    pub fn file_pathonly(sggstdpath: &String, wintitle: &str) -> String {
-
-        //todo: Include some of the modifications made to the file_browse_tosave() function.
+    pub fn file_pathonly(mut sggstdpath: &str, wintitle: &str) -> String {
 
         // region Check that the passed directory exists and `startpath` is ready.
-        let track = dir_check_valid(&mut sggstdpath.to_string());  // Defaults to home directory on err.
+        let track = dir_normalize_path(&mut sggstdpath);  // Defaults to home directory on err.
         let startpath = Path::new(track.as_str());
         // endregion
 
-        // region Call a dialog browser and set it to the passed directory.
-        let mut fchooser = dialog::NativeFileChooser::new(dialog
-                                            ::NativeFileChooserType
-                                            ::BrowseDir);
-        fchooser.set_directory(&startpath).expect("Cannot set directory.");
-        // endregion
+        // region Call a dialog browser and set it to the passed directory & set the title.
 
-        // Set the title of the dialog browser.
+        let mut fchooser = dialog::NativeFileChooser::new(dialog::NativeFileChooserType::BrowseDir);
+        fchooser.set_directory(&startpath).expect("Cannot set directory.");
         fchooser.set_title(wintitle);
+
+        // endregion
 
         fchooser.show();
 
@@ -371,6 +324,13 @@ pub mod dir_mngmnt {
         }
     }
 
+    // region TODO'S
+    // todo: Could `dir_check_valid` and `dir_normalize_path` be combined into one function?
+    //       The only difference is that `dir_check_valid` returns the original path if it exists,
+    //       while `dir_normalize_path` returns the parent directory if the path is a file.
+    // todo: Could/should they be turned into methods?
+    // endregion
+
     /// Validates the given directory path and ensures it is ready for use.
     /// If the provided directory exists, its path is returned. Otherwise,
     /// the function falls back to the user's home directory.
@@ -406,14 +366,14 @@ pub mod dir_mngmnt {
     /// which retrieves the user's home directory as a `String`. Ensure this
     /// dependency is properly implemented.
     ///
-    pub fn dir_check_valid(usedir: &String) -> String {
+    pub fn dir_check_valid(dirstring: &str) -> String {
 
         // Make sure the directory exists and `trail` is ready for use.
-        let trail = Path::new(usedir);
+        let trail = Path::new(dirstring);
         if trail.exists() {
-            usedir.clone()
+            dirstring.to_string().clone()
         } else {   // If the directory doesn't exist, default to the home directory.
-            eprintln!("The path {} does not exist!", usedir);
+            eprintln!("The path {} does not exist!", dirstring);
             let track: String = dir_get_home();
             track
         }

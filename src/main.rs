@@ -10,7 +10,7 @@ use lib_file::file_fltk::*;
 fn main() {
     let usedir = "/home/jtreagan/programming/mine/qbnk_rb7/src/qbnk_data/lists";
 
-    let path = file_browse_tosave(&usedir, "wwwwwww", "lst");
+    let path = file_pathonly(usedir, "TITLE TITLE TITLE");
 
     println!("\n {} \n", path);
 }
