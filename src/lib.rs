@@ -58,7 +58,6 @@ pub mod file_fltk {
     use std::path::Path;
     use crate::dir_mngmnt::*;
 
-
     /// Opens a native file save dialog for the user to select a location
     /// and name for saving a file, with pre-suggested parameters and a file extension filter.
     ///
@@ -87,15 +86,11 @@ pub mod file_fltk {
     /// - If an invalid directory is specified in `sggstdpath`, it defaults to the user's home directory.
     ///
     /// # Example
-    /// ```rust
-    /// let save_path = file_browse_tosave(
-    ///     "/home/user/documents",
-    ///     "example_file",
-    ///     "txt",
-    ///     "Save Example File"
-    /// );
-    /// println!("File to save at: {}", save_path);
-    /// ```
+    ///     fn main() {
+    ///         let usedir = "/home/jtreagan/programming/mine/qbnk_rb7/src/qbnk_data/lists";
+    ///         let path = file_browse_tosave(usedir, "fakefilename", "txt");
+    ///         println!("\n {} \n", path);
+    ///     }
     ///
     /// # Dependencies
     /// - This function utilizes `dialog::NativeFileChooser` for handling the native file save dialog.
@@ -159,8 +154,38 @@ pub mod file_fltk {
         path
     }
 
-    /// Browse to a desired directory, return a string to use as a path for saving.
-    /// Returned string includes both the path only, without the file name.
+    /// Opens a native directory chooser dialog, sets its starting path and window title,
+    /// and returns the selected directory path as a `String`.
+    ///
+    /// # Arguments
+    ///
+    /// * `sggstdpath` - A mutable string slice representing the initial directory path.
+    ///   If the provided path is invalid, it defaults to the user's home directory.
+    /// * `wintitle` - A string slice representing the title of the dialog window.
+    ///
+    /// # Returns
+    ///
+    /// This function returns the selected directory path as a `String`.
+    /// If no selection is made or an error occurs during directory selection,
+    /// it may result in unexpected behavior.
+    ///
+    /// # Panics
+    ///
+    /// This function will panic if the directory passed to `fchooser.set_directory()`
+    /// is invalid and cannot be set.
+    ///
+    /// # Examples
+    ///
+    ///     fn main() {
+    ///         let usedir = "/home/jtreagan/programming/mine/qbnk_rb7/src/qbnk_data/lists";
+    ///         let path = file_pathonly(usedir, "TITLE TITLE TITLE");
+    ///         println!("\n {} \n", path);
+    ///     }
+    ///
+    /// # Notes
+    ///
+    /// This function relies on `dialog::NativeFileChooser` for platform-native file chooser dialogs
+    /// and uses the helper function `dir_normalize_path` to handle and sanitize the input directory path.
     pub fn file_pathonly(mut sggstdpath: &str, wintitle: &str) -> String {
 
         // region Check that the passed directory exists and `startpath` is ready.
@@ -173,19 +198,46 @@ pub mod file_fltk {
         let mut fchooser = dialog::NativeFileChooser::new(dialog::NativeFileChooserType::BrowseDir);
         fchooser.set_directory(&startpath).expect("Cannot set directory.");
         fchooser.set_title(wintitle);
+        fchooser.show();
 
         // endregion
-
-        fchooser.show();
 
         let pathonly = fchooser.filename().to_str().unwrap().to_string();
         pathonly
     }
 
-
-
-    /// Browse to a desired directory, return the chosen file name only.
-    /// 
+    /// A function that presents a native file chooser dialog to the user, allowing them to browse
+    /// for a file starting from a specified directory, and returns the selected file's name only.
+    ///
+    /// This function takes two inputs: a mutable reference to a string representing the starting directory
+    /// and a string for the window's title. It normalizes the directory path, initializes the native
+    /// file chooser dialog, sets its initial directory to the given path, and allows the user to select a file.
+    /// The name of the selected file (with no accompanying path information) is then extracted and returned as a `String`.
+    ///
+    /// # Arguments
+    /// * `sggstdpath` - A mutable reference to a string slice representing the starting
+    ///   path. If invalid or unavailable, it defaults to the user's home directory.
+    /// * `wintitle` - The title of the window for the file chooser dialog.
+    ///
+    /// # Returns
+    /// A `String` containing the name of the selected file, which is extracted from the full path provided
+    /// by the file chooser. If the user does not select a file or the operation fails, the function may panic.
+    ///
+    /// # Panics
+    /// This function will panic in the following scenarios:
+    /// 1. If the set directory is invalid or cannot be set (this is handled through the dialog API).
+    /// 2. If the returned file path does not contain a valid file name (e.g., if the path is empty).
+    /// 3. If the extracted filename is not valid UTF-8.
+    ///
+    /// # Example
+    ///     fn main() {
+    ///         let usedir = "/some/existing/directory";
+    ///         let path = file_nameonly(usedir, "TITLE TITLE TITLE");
+    ///         println!("\n {} \n", path);
+    ///     }
+    ///
+    /// Note: This function uses `dialog::NativeFileChooser` for presenting the file dialog
+    /// and `std::path::Path` for dealing with directory paths.
     pub fn file_nameonly(mut sggstdpath: &str, wintitle: &str) -> String {
 
         // region Check that the passed directory exists and `startpath` is ready.
@@ -193,23 +245,23 @@ pub mod file_fltk {
         let startpath = Path::new(track.as_str());
         // endregion
 
+        // region Call a dialog browser, set it to the passed directory & set the title.
 
-        // Make sure the passed directory exists and `startpath` is ready.
-        let track = dir_check_valid(&mut usedir);  // Defaults to home directory on err.
-        let startpath = Path::new(track.as_str());
+        let mut fchooser = dialog::NativeFileChooser::new(dialog::NativeFileChooserType::BrowseFile);
+        fchooser.set_directory(&startpath).expect("Cannot set directory.");
+        fchooser.set_title(wintitle);
+        fchooser.show();
 
-        // Set the dialog browser to the default directory.
-        let mut dialog = dialog::NativeFileChooser::new(dialog
-                        ::NativeFileChooserType::BrowseFile);
-        dialog.set_directory(&startpath).expect("Directory does not exist.");
+        // endregion
 
-        dialog.show();
+        // region Extract the file name from the path.
 
-        let path = dialog.filename();
-
+        let path = fchooser.filename();
         let filename = path.file_name().expect("The path has no file available.");
         let filename_str = filename.to_str().expect("The path is not valid UTF-8");
         let filename_string: String = filename_str.to_string();
+
+        // endregion
 
         filename_string
     }
