@@ -19,6 +19,7 @@
 //!    * REPOSITORY = "<https://github.com/jtreagan/lib_file>";
 
 /// # Functions based on the fltk::dialog module.
+///
 pub mod file_fltk {
     // region todo's
     //todo: Passing usedir as an &String is clumsy.  Find a better way.
@@ -58,6 +59,133 @@ pub mod file_fltk {
     use std::path::Path;
     use crate::dir_mngmnt::*;
 
+    /// Prompts the user with a file-save dialog, allowing them to select a file location and name.
+    ///
+    /// # Parameters
+    ///
+    /// - `sggstdpath`: A suggested directory path where the dialog should initially open.
+    ///   This value is used as a starting point for the file browser, but users can change
+    ///   the location if desired. If the directory is invalid or does not exist, the
+    ///   function defaults to the user's home directory.
+    /// - `sggstdname`: A suggested filename to prefill in the dialog box. Users can
+    ///   change this as necessary.
+    /// - `extnsnvec`: A vector of file extensions to use as selectable filters during the file-saving
+    ///   process. The first item in the vector is assumed to be a label, and the second item is used
+    ///   to define the default file extension.
+    ///
+    /// # Returns
+    ///
+    /// - Returns a `String` representing the full path selected by the user, including the chosen
+    ///   file name. If the dialog is cancelled, this value may vary depending on implementation and
+    ///   should be treated with caution.
+    ///
+    /// # Function Workflow
+    ///
+    /// 1. **Validate Input Directory Path**:
+    ///    - Confirm that `sggstdpath` points to a valid directory.
+    ///    - When invalid, the function defaults to the home directory.
+    /// 2. **Initialize the File Browser**:
+    ///    - A `NativeFileChooser` dialog box of type `BrowseSaveFile` is created and set to open
+    ///      at the validated starting directory.
+    /// 3. **Apply Default File Extension**:
+    ///    - If `extnsnvec` has a valid second entry (default extension), it is appended to
+    ///      `sggstdname` as the default suggested filename.
+    /// 4. **Set File Filters**:
+    ///    - Create a combined filter string from `extnsnvec` and apply it to the file browser.
+    /// 5. **User Interaction**:
+    ///    - Display the dialog to the user, allowing them to choose a file path and name.
+    ///    - The user-selected file path is then returned as a `String`.
+    ///
+    /// # Assumptions
+    ///
+    /// - `extnsnvec` contains at least two elements and should contain an even number of elements.
+    ///   The first entry is a label and
+    ///   the second entry specifies the default file extension.
+    /// - The user's environment supports a native file dialog (e.g., a GUI-based desktop).
+    /// - The second element in `extnsnvec`, if present, will follow the typical pattern of
+    ///   file extension filters (e.g., `"*.txt"`).
+    ///
+    /// # Example
+    ///
+    ///     fn main() {
+    ///         let suggested_path = "/home/user/Documents";
+    ///         let suggested_name = "new_file";
+    ///         let extensions = vec!["Text Files", "*.txt", "*.csv"];
+    ///
+    ///         let result = file_browse_tosave(suggested_path, suggested_name, &extensions);
+    ///         println!("Selected file path: {}", result);
+    ///     }
+    ///
+    /// # Notes
+    ///
+    /// - The user can override both the suggested directory and file name.
+    /// - Invoking the dialog may depend on system-dependent GUI frameworks.
+    /// - Returns an empty string or unexpected value if the dialog is cancelled, so handle
+    ///   that return value carefully.
+    ///
+    /// # Errors
+    ///
+    /// - Panics if the `set_directory` operation fails for the given directory path.
+    /// - If `extnsnvec[1]` is absent or invalid, using an invalid index will cause a panic.
+    ///
+    /// # See Also:
+    ///
+    /// - `dialog::NativeFileChooser` for more details about the underlying dialog implementation.
+    /// - `fltk_build_dialogfltr` for details on constructing the filter string.
+    ///
+    /// # Region Breakdown
+    ///
+    /// - The function is broken into regions for validating paths, setting up dialog filters,
+    ///   processing suggested filenames, and showing the file browser to the user.
+    pub fn file_browse_tosave(sggstdpath: &str, sggstdname: &str, extnsnvec: &Vec<&str>) -> String {
+
+// region Note:
+//   The passed string `sggstdpath` should be a suggested directory for saving a
+//   file using the suggested `sggstdname` for a file name.  Note that both
+//   variables are "suggestions" allowing for the user to change either.
+// endregion
+
+        // region Check that the passed directory exists and `startpath` is ready.
+        let track = dir_check_valid(&mut sggstdpath.to_string());  // Defaults to home directory on err.
+        let startpath = Path::new(track.as_str());
+        // endregion
+
+        // region Call a dialog browser and set it to the passed directory.
+        let mut fchooser = dialog::NativeFileChooser
+        ::new(dialog::NativeFileChooserType
+        ::BrowseSaveFile);
+        fchooser.set_directory(&startpath).expect("Cannot set directory.");
+        // endregion
+
+        // region  Add the passed extension to the suggested file name.
+
+        let usename;
+
+        let defaultextnsn = extnsnvec[1];  // Assumes the first entry is a label so chooses the second.
+        if defaultextnsn != "" {
+            let ext_to_append = defaultextnsn.strip_prefix("*.").unwrap_or(defaultextnsn);
+            usename = format!("{}.{}", sggstdname, ext_to_append);
+        } else {
+            usename = sggstdname.to_string();
+        }
+
+        fchooser.set_preset_file(usename.as_str());
+
+        // endregion
+
+        // region Create the filter string & set the filter.
+
+        let mut combined_filter = fltk_build_dialogfltr(&extnsnvec);
+        fchooser.set_filter(&combined_filter);
+        // endregion
+
+        fchooser.show();
+
+        let path = fchooser.filename().to_str().unwrap().to_string();
+        path
+    }
+
+    /*
     /// Opens a native file save dialog for the user to select a location
     /// and name for saving a file, with pre-suggested parameters and a file extension filter.
     ///
@@ -95,7 +223,7 @@ pub mod file_fltk {
     /// # Dependencies
     /// - This function utilizes `dialog::NativeFileChooser` for handling the native file save dialog.
     /// - The function requires utilities like `dir_check_valid` to validate the suggested directory.
-    pub fn file_browse_tosave(sggstdpath: &str, sggstdname: &str, sggstdextnsn: &str) -> String {
+    pub fn file_browse_tosave_old(sggstdpath: &str, sggstdname: &str, sggstdextnsn: &str) -> String {
 
         // region Note:
         //          The passed string `sggstdpath` should be a suggested directory for saving a
@@ -108,12 +236,16 @@ pub mod file_fltk {
         let startpath = Path::new(track.as_str());
         // endregion
 
+        println!("FBW1");
+
         // region Call a dialog browser and set it to the passed directory.
         let mut fchooser = dialog::NativeFileChooser
                                 ::new(dialog::NativeFileChooserType
                                 ::BrowseSaveFile);
         fchooser.set_directory(&startpath).expect("Cannot set directory.");
         // endregion
+
+        println!("FBW2");
 
         // region  Add the passed extension to the suggested file name.
         let usename;
@@ -126,6 +258,8 @@ pub mod file_fltk {
         fchooser.set_preset_file(usename.as_str());
         // endregion
 
+        println!("FBW3");
+
         // region Create the filter string & set the filter.
 
         // todo: Pass the extension suggestion in a vector that can include multiple extensions.
@@ -134,6 +268,8 @@ pub mod file_fltk {
         let combined_filter;
         if sggstdextnsn == "" {
             combined_filter = "All Files\t*.*".to_string();
+
+
         }  else {
             let useext;
             if !sggstdextnsn.starts_with("*.") {
@@ -147,12 +283,19 @@ pub mod file_fltk {
         fchooser.set_filter(&combined_filter);
         // endregion
 
+        println!("FBW4");
+
         fchooser.show();
+
+        println!("FBW5");
 
         let path = fchooser.filename().to_str().unwrap().to_string();
 
+        println!("FBW6");
+
         path
     }
+    */  // Deleteme later.
 
     /// Opens a native directory chooser dialog, sets its starting path and window title,
     /// and returns the selected directory path as a `String`.
@@ -303,6 +446,7 @@ pub mod file_fltk {
 
         // region Check that the passed directory exists and `startpath` is ready.
         let track = dir_normalize_path(&mut sggstdpath);  // Defaults to home directory on err.
+
         let startpath = Path::new(track.as_str());
         // endregion
 
@@ -376,9 +520,91 @@ pub mod file_fltk {
         filename_string
     }
 
+    /// Constructs a filter string for use in FLTK dialog functions based on pairs of labels and extensions.
+    ///
+    /// The `fltk_build_dialogfltr` function takes a vector of string slices (`&Vec<&str>`) containing alternating
+    /// labels and extensions, and produces a properly formatted filter string for use in FLTK file dialogs.
+    ///
+    /// # Parameters
+    ///
+    /// * `labelextns`: A vector of string slices containing alternating file type labels and their corresponding
+    ///   file extension patterns. Each label should be paired with its extension. Extensions can include wildcards
+    ///   (e.g. `*.txt`) or curly-braced patterns (e.g. `{*.jpg,*.png}`).
+    ///
+    /// # Returns
+    ///
+    /// Returns a formatted string with the label and extension/filter pattern pairs, each pair on a new line. The
+    /// format for each line is:
+    ///
+    /// ```text
+    /// label<TAB>extension_pattern
+    /// ```
+    ///
+    /// - Example:
+    ///
+    /// ```text
+    /// Text Files	*.txt
+    /// Images	{*.jpg,*.png}
+    /// ```
+    ///
+    /// # Panics
+    ///
+    /// This function does not panic, but will silently skip input strings that do not form valid label-extension pairs
+    /// (e.g., if the vector has an odd number of elements).
+    ///
+    /// # Example
+    ///
+    ///     fn main() {
+    ///         let label_extensions = vec![
+    ///             "Text Files", "*.txt",
+    ///             "Images", "{*.jpg,*.png}",
+    ///             "Rust Files", "*.rs"
+    ///     ];
+    ///
+    ///         let dialog_filter = fltk_build_dialogfltr(&label_extensions);
+    ///         println!("{}", dialog_filter);
+    /// }
+    ///
+    /// Example output:
+    /// ```text
+    /// Text Files	*.txt
+    /// Images	{*.jpg,*.png}
+    /// Rust Files	*.rs
+    /// ```
+    ///
+    /// # Notes
+    ///
+    /// - If an extension doesn't start with `*.` or doesn't contain `{`, the function automatically prepends
+    ///   `*.` to the provided extension.
+    /// - The function ignores invalid input pairs without causing a runtime error.
+    ///
+    pub fn fltk_build_dialogfltr(labelextns: &Vec<&str>) -> String {
+        let mut parts = Vec::new();
+        let mut usextnsn = String::new();
+
+        for pair in labelextns.chunks(2) {
+            match pair {
+                [label, extension] => {  // Ensure pattern starts with "*."
+                    if !extension.starts_with("*.") && !extension.contains('{') {
+                        usextnsn = format!("*.{}", extension); // temporary string if needed
+                    }
+                    else {
+                        usextnsn = extension.to_string();
+                    }
+                    parts.push(format!("{}\t{}", label, usextnsn));
+                }
+                _ => {},
+            }
+        }
+        let combined_filter = parts.join("\n");
+        combined_filter
+    }
+
+
 }  // End of file_fltk module.
 
 /// # Functions dealing with directories.
+///
 pub mod dir_mngmnt {
     use std::{env, fs, io, path::Path};
     use lib_utils::input_utilities::input_string_prompt;
@@ -660,6 +886,7 @@ pub mod dir_mngmnt {
 } // End of dir_mngmnt module.
 
 /// # Terminal-based file i/o functions.
+///
 pub mod file_mngmnt {
 
 //! ### Note the following:
