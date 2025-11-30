@@ -108,6 +108,7 @@ pub mod file_fltk {
     /// # Example
     ///
     ///     fn main() {
+    ///         let app = app::App::default();
     ///         let suggested_path = "/home/user/Documents";
     ///         let suggested_name = "new_file";
     ///         let extensions = vec!["Text Files", "*.txt", "*.csv"];
@@ -175,7 +176,7 @@ pub mod file_fltk {
 
         // region Create the filter string & set the filter.
 
-        let mut combined_filter = fltk_build_dialogfltr(&extnsnvec);
+        let combined_filter = fltk_build_dialogfltr(&extnsnvec);
         fchooser.set_filter(&combined_filter);
         // endregion
 
@@ -580,24 +581,22 @@ pub mod file_fltk {
     ///
     pub fn fltk_build_dialogfltr(labelextns: &Vec<&str>) -> String {
         let mut parts = Vec::new();
-        let mut usextnsn = String::new();
 
         for pair in labelextns.chunks(2) {
-            match pair {
+            match pair {  // I used a match here instead of `if let` because I don't like `if let`.
                 [label, extension] => {  // Ensure pattern starts with "*."
-                    if !extension.starts_with("*.") && !extension.contains('{') {
-                        usextnsn = format!("*.{}", extension); // temporary string if needed
+                    let usextnsn = if !extension.starts_with("*.") && !extension.contains('{') {
+                        format!("*.{}", extension) // temporary string if needed
                     }
                     else {
-                        usextnsn = extension.to_string();
-                    }
+                        extension.to_string()
+                    };
                     parts.push(format!("{}\t{}", label, usextnsn));
                 }
                 _ => {},
             }
         }
-        let combined_filter = parts.join("\n");
-        combined_filter
+        parts.join("\n")
     }
 
 

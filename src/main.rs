@@ -7,7 +7,7 @@ use lib_file::file_fltk::*;
 
 
 fn main() {
-   // let app = app::App::default(); // must live while dialogs are used
+   let _app = app::App::default(); // must live while dialogs are used
 
 
     //let usedir = "/home/jtreagan/programming/mine/qbnk_rb7/src/qbnk_data/banks";
